@@ -35,3 +35,10 @@ def update():
     for layer in world:
         for o in layer[:]:
             o.update()
+
+
+def render():
+    for depth, layer in enumerate(world):
+        objs = sorted(layer, key=lambda o: -o.y) if depth == LAYER_CHAR else layer
+        for o in objs:
+            o.draw()
