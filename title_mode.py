@@ -108,7 +108,7 @@ def draw():
         a = 0.35 + 0.2 * math.sin(t * 2 + ph)
         if kind == 'shard':
             img_draw('glow_y', ix, iy + bob, 34, 34, a * 0.5)
-            img_draw('px_gold', ix, iy + bob, 9, 9, a + 0.25, math.pi / 4)
+            img_draw('i_light', ix, iy + bob, 18, 18, a + 0.3)
         elif foes:
             foes.draw(int(t * 4 + ph) % 4, 0, ix, iy + bob - 10, 22, alpha=a + 0.1)
     draw_util.say_logo(game_settings.TITLE, W / 2, H - 140, 60)
