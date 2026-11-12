@@ -25,13 +25,15 @@ while len(ICONS) < 24:
     ICONS.append((ix, iy, _rng.choice(('shard', 'shadow')), _rng.uniform(0, 6.28)))
 
 clock = 0.0
+sel = 0
 hero = None
 foes = None
 
 
 def init():
-    global clock, hero, foes
+    global clock, sel, hero, foes
     clock = 0.0
+    sel = 0
     hero = sheet.load('player.png', 4, 4)
     foes = sheet.load('enemies.png', 4, 5, per_row=True)
 
@@ -48,12 +50,33 @@ def resume():
     pass
 
 
+def go():
+    if sel == 2:
+        game_framework.quit()
+    # 게임 시작은 플레이 모드를 만든 뒤 연결, 조작법은 4주차에 연결
+
+
 def handle_events():
+    global sel
     for e in get_events():
         if e.type == SDL_QUIT:
             game_framework.quit()
-        elif e.type == SDL_KEYDOWN and e.key == SDLK_ESCAPE:
-            game_framework.quit()
+        elif e.type == SDL_KEYDOWN:
+            if e.key in game_settings.KEY_UP:
+                sel = (sel - 1) % len(MENU)
+            elif e.key in game_settings.KEY_DOWN:
+                sel = (sel + 1) % len(MENU)
+            elif e.key in (SDLK_SPACE, SDLK_RETURN):
+                go()
+            elif e.key == SDLK_ESCAPE:
+                game_framework.quit()
+        elif e.type in (SDL_MOUSEMOTION, SDL_MOUSEBUTTONDOWN):
+            mx, my = e.x, H - 1 - e.y
+            for i in range(len(MENU)):
+                if abs(mx - W / 2) < BTN_W / 2 and abs(my - (BTN_Y - i * BTN_GAP)) < BTN_H / 2:
+                    sel = i
+                    if e.type == SDL_MOUSEBUTTONDOWN:
+                        go()
 
 
 def update():
@@ -100,6 +123,6 @@ def draw():
         foes.draw(int(t * 3) % 4, 3, ex, ey + math.sin(t * 3) * 3, 120)
 
     for i, label in enumerate(MENU):
-        draw_button(label, W / 2, BTN_Y - i * BTN_GAP, i == 0)
+        draw_button(label, W / 2, BTN_Y - i * BTN_GAP, i == sel)
     say('2DGP TERM PROJECT', W / 2, 26, 12, 'g', 'center', 'clean')
     update_canvas()
