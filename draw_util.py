@@ -90,3 +90,16 @@ def draw_str(s, x, y, size, align, layers, style):
         x -= tw / 2 if align == 'center' else tw
     for dx, dy, col in layers:
         font.draw(x + dx, y + dy, s, col)
+
+
+def say(s, x, y, size=20, color='w', align='left', style='main'):
+    d = max(2, size // 12)
+    draw_str(s, x, y, size, align, [(d, -d, (0, 0, 0)), (0, 0, COLORS[color])], style)
+
+
+def say_logo(s, x, y, size, align='center'):
+    d = max(2, size // 14)
+    b = (0, 0, 0)
+    layers = [(-d, 0, b), (d, 0, b), (0, d, b), (0, -d, b), (d * 2, -d * 2, b),
+              (d, -d, COLORS['d']), (0, 0, (225, 205, 255))]
+    draw_str(s, x, y, size, align, layers, 'title')
