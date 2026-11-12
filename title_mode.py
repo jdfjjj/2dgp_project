@@ -25,3 +25,12 @@ def handle_events():
             game_framework.quit()
         elif e.type == SDL_KEYDOWN and e.key == SDLK_ESCAPE:
             game_framework.quit()
+
+
+def update():
+    pass
+
+
+def draw():
+    clear_canvas()
+    update_canvas()
