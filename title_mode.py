@@ -117,14 +117,15 @@ def draw():
         img_draw('glow_l', fx, 150, 520, 90, 0.06)
 
     hx, hy = 190, 160                                    # 주인공 + 금빛 구슬
-    ox, oy = hx + 44, hy + 62 + math.sin(t * 2) * 3
+    ox, oy = hx + 40, hy + 58 + math.sin(t * 2) * 3
     img_draw('glow_y', ox, oy, 320, 320, 0.22 + 0.04 * math.sin(t * 5))   # 주변을 비추는 빛
     img_draw('glow_y', hx, hy + 4, 220, 50, 0.35)                         # 발밑 빛
     img_draw('shadow', hx, hy + 2, 80, 14, 0.9)
     if hero:
         hero.draw(int(t * 4) % 4, 0, hx, hy + abs(math.sin(t * 2.2)) * 4, 140, alpha=0.82)
-    img_draw('glow_y', ox, oy, 46, 46, 0.8 + 0.15 * math.sin(t * 11))     # 구슬
-    img_draw('glow_w', ox, oy, 14, 14, 0.95)
+    img_draw('glow_y', ox, oy, 90, 90, 0.55 + 0.1 * math.sin(t * 6))     # 빛 조각의 빛
+    img_draw('px_gold', ox, oy, 13, 13, 1.0, math.pi / 4)                 # 손에 든 빛 조각
+    img_draw('px_white', ox, oy, 5, 5, 0.9, math.pi / 4)
 
     ex, ey = 770, 160                                    # 적 (어둠 쪽)
     img_draw('shadow', ex, ey + 2, 100, 14, 0.9)
