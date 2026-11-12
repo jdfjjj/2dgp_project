@@ -29,3 +29,9 @@ def objects(depth):
 def clear():
     for layer in world:
         layer.clear()
+
+
+def update():
+    for layer in world:
+        for o in layer[:]:
+            o.update()
