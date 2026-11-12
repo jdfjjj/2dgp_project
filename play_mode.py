@@ -32,3 +32,11 @@ def handle_events():
 
 def update():
     pass
+
+
+def draw():
+    clear_canvas()
+    box('dark', 0, 0, W, H)
+    say('플레이 모드', W / 2, H / 2 + 20, 32, 'l', 'center')
+    say('ESC를 누르면 타이틀로 돌아가요', W / 2, H / 2 - 30, 18, 'g', 'center')
+    update_canvas()
