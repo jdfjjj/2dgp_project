@@ -37,7 +37,8 @@ def handle_events():
 
 
 def update():
-    pass
+    global clock
+    clock += game_framework.frame_time
 
 
 def draw():
