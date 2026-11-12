@@ -65,3 +65,28 @@ def get_font(size, style='main'):
         font = get_font(size, 'main')
     _fonts[key] = font
     return font
+
+
+def text_width(font, s, size):
+    try:
+        import ctypes
+        from sdl2.sdlttf import TTF_SizeUTF8
+        w, h = ctypes.c_int(), ctypes.c_int()
+        TTF_SizeUTF8(font.font, s.encode('utf-8'), ctypes.byref(w), ctypes.byref(h))
+        if w.value > 0:
+            return w.value
+    except Exception:
+        pass
+    return len(s) * size * 0.6
+
+
+def draw_str(s, x, y, size, align, layers, style):
+    font = get_font(size, style)
+    if font is None:
+        return
+    s = str(s)
+    if align != 'left':
+        tw = text_width(font, s, size)
+        x -= tw / 2 if align == 'center' else tw
+    for dx, dy, col in layers:
+        font.draw(x + dx, y + dy, s, col)
