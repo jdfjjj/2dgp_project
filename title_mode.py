@@ -10,6 +10,7 @@ import game_framework
 import draw_util
 from draw_util import img_draw, box, say, draw_str, COLORS
 import sheet
+import play_mode
 
 MENU = ['게임 시작', '조작법', '게임 종료']
 BTN_W, BTN_H, BTN_Y, BTN_GAP = 280, 44, 330, 62
@@ -53,9 +54,11 @@ def resume():
 
 
 def go():
-    if sel == 2:
+    if sel == 0:
+        game_framework.change_mode(play_mode)
+    elif sel == 2:
         game_framework.quit()
-    # 게임 시작은 플레이 모드를 만든 뒤 연결, 조작법은 4주차에 연결
+    # 조작법은 4주차에 연결
 
 
 def handle_events():
