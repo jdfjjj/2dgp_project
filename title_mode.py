@@ -122,7 +122,7 @@ def draw():
     img_draw('glow_y', hx, hy + 4, 220, 50, 0.35)                         # 발밑 빛
     img_draw('shadow', hx, hy + 2, 80, 14, 0.9)
     if hero:
-        hero.draw(int(t * 4) % 4, 0, hx, hy + abs(math.sin(t * 2.2)) * 4, 140)
+        hero.draw(int(t * 4) % 4, 0, hx, hy + abs(math.sin(t * 2.2)) * 4, 140, alpha=0.82)
     img_draw('glow_y', ox, oy, 46, 46, 0.8 + 0.15 * math.sin(t * 11))     # 구슬
     img_draw('glow_w', ox, oy, 14, 14, 0.95)
 
