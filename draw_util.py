@@ -101,5 +101,5 @@ def say_logo(s, x, y, size, align='center'):
     d = max(2, size // 14)
     b = (0, 0, 0)
     layers = [(-d, 0, b), (d, 0, b), (0, d, b), (0, -d, b), (d * 2, -d * 2, b),
-              (d, -d, COLORS['d']), (0, 0, (225, 205, 255))]
+              (d, -d, (150, 105, 25)), (0, 0, (255, 215, 110))]
     draw_str(s, x, y, size, align, layers, 'title')
