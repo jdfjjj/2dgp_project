@@ -62,8 +62,9 @@ def draw_tile(c, r):
     variant = 'b' if (c * 7 + r * 13) % 11 == 0 else 'a'     # 가끔 금 간 바닥
     img_draw('t_floor%d%s' % (theme, variant), x, y, TILE, TILE)
     if ch == 'B':
-        img_draw('shadow', x, y - 11, 28, 8, 0.8)
-        img_draw('barrel', x, y + 2, 28, 26)
+        s = 0.8 + ((c * 31 + r * 17) % 4) * 0.1          # 통마다 크기가 조금씩 다름 (0.8 ~ 1.1배)
+        img_draw('shadow', x, y - 11, 28 * s, 8 * s, 0.8)
+        img_draw('barrel', x, y - 11 + 13 * s, 28 * s, 26 * s)
 
 
 class LevelView:
