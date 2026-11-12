@@ -124,10 +124,13 @@ def draw():
     img_draw('glow_y', ox, oy, 46, 46, 0.8 + 0.15 * math.sin(t * 11))     # 구슬
     img_draw('glow_w', ox, oy, 14, 14, 0.95)
 
-    ex, ey = 770, 160                                    # 적 (큰 그림자)
+    ex, ey = 770, 160                                    # 적 (어둠 쪽)
     img_draw('shadow', ex, ey + 2, 100, 14, 0.9)
     if foes:
-        foes.draw(int(t * 3) % 4, 3, ex, ey + math.sin(t * 3) * 3, 120)
+        foes.draw(int(t * 3) % 4, 3, ex, ey + math.sin(t * 3) * 3, 120, alpha=0.75)
+    eb = math.sin(t * 3) * 3
+    for dx in (-4, 18):                                  # 눈빛
+        img_draw('glow_y', ex + dx, ey + 51 + eb, 30, 30, 0.45 + 0.2 * math.sin(t * 5))
 
     for i, label in enumerate(MENU):
         draw_button(label, W / 2, BTN_Y - i * BTN_GAP, i == sel)
