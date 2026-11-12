@@ -34,7 +34,7 @@ def init():
     global clock, sel, hero, foes
     clock = 0.0
     sel = 0
-    hero = sheet.load('player.png', 4, 4)
+    hero = sheet.load('player.png', 4, 8)
     foes = sheet.load('enemies.png', 4, 5, per_row=True)
 
 
