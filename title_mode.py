@@ -28,14 +28,16 @@ clock = 0.0
 sel = 0
 hero = None
 foes = None
+icons = None
 
 
 def init():
-    global clock, sel, hero, foes
+    global clock, sel, hero, foes, icons
     clock = 0.0
     sel = 0
-    hero = sheet.load('player.png', 4, 8)
-    foes = sheet.load('enemies.png', 4, 5, per_row=True)
+    hero = sheet.load('player.png', 4, 8, pixel=70)
+    foes = sheet.load('enemies.png', 4, 5, per_row=True, pixel=46)
+    icons = sheet.load('enemies.png', 4, 5, per_row=True, pixel=22)
 
 
 def finish():
@@ -109,8 +111,8 @@ def draw():
         if kind == 'shard':
             img_draw('glow_y', ix, iy + bob, 34, 34, a * 0.5)
             img_draw('i_light', ix, iy + bob, 18, 18, a + 0.3)
-        elif foes:
-            foes.draw(int(t * 4 + ph) % 4, 0, ix, iy + bob - 10, 22, alpha=a + 0.1)
+        elif icons:
+            icons.draw(int(t * 4 + ph) % 4, 0, ix, iy + bob - 10, 22, alpha=a + 0.1)
     draw_util.say_logo(game_settings.TITLE, W / 2, H - 140, 60)
     for i in range(4):                                   # 바닥 안개
         fx = (i * 300 + t * 12) % (W + 400) - 200
