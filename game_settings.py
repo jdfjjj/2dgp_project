@@ -45,3 +45,7 @@ THEMES = [
     dict(name='FROST CELLAR', floor=(36, 46, 64), line=(22, 28, 42), wall=(68, 86, 116), wdark=(32, 40, 58)),
     dict(name='THE ABYSS', floor=(30, 22, 40), line=(16, 10, 24), wall=(58, 40, 80), wdark=(24, 16, 36)),
 ]
+
+
+def clampf(v, lo, hi):
+    return max(lo, min(hi, v))
