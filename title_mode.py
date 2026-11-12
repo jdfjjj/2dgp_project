@@ -45,4 +45,5 @@ def draw():
     clear_canvas()
     box('dark', 0, 0, W, H)
     img_draw('glow_l', W / 2, H / 2 + 60, 700, 260, 0.12 + 0.04 * math.sin(clock * 2))
+    draw_util.say_logo(game_settings.TITLE, W / 2, H / 2 + 60, 72)
     update_canvas()
