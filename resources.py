@@ -8,7 +8,7 @@ from pico2d import load_image
 import game_settings
 import draw_util
 
-ASSET_VERSION = 'w1c'
+ASSET_VERSION = 'w1d'
 
 
 def gp(name):
@@ -68,6 +68,16 @@ def gen(name, w, h, fn, smooth=False):
         SMOOTH.add(name)
     if REBUILD[0]:
         write_png(gp(name + '.png'), w, h, fn)
+
+
+def sprite(name, rows, pal):
+    """글자 그림(한 글자 = 한 픽셀)으로 작은 픽셀 아이콘을 만듦"""
+    h, w = len(rows), len(rows[0])
+
+    def px(x, y):
+        c = rows[y][x]
+        return rgba(pal[c]) if c in pal else (0, 0, 0, 0)
+    gen(name, w, h, px)
 
 
 def _inside(px, py, pts):
@@ -239,6 +249,20 @@ def shadow_px(x, y):
     return (0, 0, 0, 120 * (1 - d)) if d < 1 else (0, 0, 0, 0)
 
 
+LIGHT_PAL = {'o': (110, 70, 15), 'W': (255, 245, 190), 'Y': (255, 205, 90), 'd': (200, 140, 40)}
+LIGHT_ICON = [
+    '....o....',
+    '...oWo...',
+    '..oWWYo..',
+    '.oWWYYYo.',
+    'oWYYYYYdo',
+    '.oYYYYdo.',
+    '..oYYdo..',
+    '...odo...',
+    '....o....',
+]
+
+
 SOLIDS = {
     'dark': (0, 0, 0, 255), 'shade': (0, 0, 0, 170), 'panel': (18, 14, 30, 235),
     'bar_light': (190, 160, 255, 255), 'px_white': (240, 240, 255, 255), 'px_lav': (200, 170, 255, 255),
@@ -266,6 +290,7 @@ def build_images():
     gen('glow_l', 128, 128, glow_fn((190, 160, 255)), True)
     gen('glow_y', 128, 128, glow_fn((255, 210, 90)), True)
     gen('shadow', 32, 10, shadow_px, True)
+    sprite('i_light', LIGHT_ICON, LIGHT_PAL)
     for name, col in SOLIDS.items():
         gen(name, 1, 1, lambda x, y, col=col: col)
 
