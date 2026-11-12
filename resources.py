@@ -31,3 +31,26 @@ def write_png(path, w, h, pixel):
         f.write(chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 6, 0, 0, 0)))
         f.write(chunk(b'IDAT', zlib.compress(bytes(raw), 9)))
         f.write(chunk(b'IEND', b''))
+
+
+def rgba(c, a=255):
+    return (c[0], c[1], c[2], c[3] if len(c) > 3 else a)
+
+
+def shade(col, d):
+    return (col[0] + d, col[1] + d, col[2] + d, col[3])
+
+
+def mix(a, b, t):
+    return (a[0] * (1 - t) + b[0] * t, a[1] * (1 - t) + b[1] * t, a[2] * (1 - t) + b[2] * t)
+
+
+def noise(x, y, seed=0):
+    n = (x * 374761393 + y * 668265263 + seed * 2147483647) & 0xffffffff
+    n = ((n ^ (n >> 13)) * 1274126177) & 0xffffffff
+    return (n & 0xffff) / 65535.0
+
+
+def vary(col, n, amt):
+    d = (n - 0.5) * 2 * amt
+    return (col[0] + d, col[1] + d, col[2] + d, col[3])
