@@ -120,7 +120,7 @@ def draw():
 
     hx, hy = 190, 160                                    # 주인공 + 손의 빛
     bob = math.sin(t * 1.5) * 1.5                        # 아주 천천히 숨쉬듯
-    lx, ly = hx + 18, hy + 32 + bob                      # 손의 빛 위치
+    lx, ly = hx + 22, hy + 32 + bob                      # 손의 빛 위치
     flick = 0.7 + 0.15 * math.sin(t * 11)                # 빛이 살짝 일렁임
     img_draw('glow_y', hx + 16, hy + 50, 210, 210, 0.2)  # 주인공을 감싸는 따뜻한 빛
     img_draw('shadow', hx, hy + 2, 66, 12, 0.9)
