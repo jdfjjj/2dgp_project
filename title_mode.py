@@ -11,6 +11,9 @@ import draw_util
 from draw_util import img_draw, box, say, draw_str, COLORS
 import sheet
 
+MENU = ['게임 시작', '조작법', '게임 종료']
+BTN_W, BTN_H, BTN_Y, BTN_GAP = 280, 44, 330, 62
+
 _rng = random.Random(7)
 ICONS = []                                   # 배경에 떠다니는 빛 조각과 그림자
 while len(ICONS) < 24:
@@ -58,6 +61,19 @@ def update():
     clock += game_framework.frame_time
 
 
+def draw_button(label, x, y, selected):
+    w, h = BTN_W, BTN_H
+    if selected:
+        img_draw('glow_y', x, y, w * 1.3, h * 2.4, 0.12 + 0.06 * math.sin(clock * 4))
+        box('px_gold', x - w / 2 - 2, y - h / 2 - 2, x + w / 2 + 2, y + h / 2 + 2)
+        box('bar_gold', x - w / 2, y - h / 2, x + w / 2, y + h / 2)
+        draw_str(label, x, y, 22, 'center', [(0, 0, COLORS['k'])], 'pixel')
+    else:
+        box('px_white', x - w / 2 - 1, y - h / 2 - 1, x + w / 2 + 1, y + h / 2 + 1, 0.25)
+        box('panel', x - w / 2, y - h / 2, x + w / 2, y + h / 2)
+        draw_str(label, x, y, 22, 'center', [(0, 0, COLORS['g'])], 'pixel')
+
+
 def draw():
     clear_canvas()
     t = clock
@@ -83,4 +99,7 @@ def draw():
     if foes:
         foes.draw(int(t * 3) % 4, 3, ex, ey + math.sin(t * 3) * 3, 120)
 
+    for i, label in enumerate(MENU):
+        draw_button(label, W / 2, BTN_Y - i * BTN_GAP, i == 0)
+    say('2DGP TERM PROJECT', W / 2, 26, 12, 'g', 'center', 'clean')
     update_canvas()
