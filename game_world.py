@@ -5,3 +5,11 @@ LAYER_DARK = 3       # 어둠 (그 위에 빛나는 것들)
 LAYER_FX = 4         # 이펙트: 던진 빛, 공격, 탄, 파티클, 숫자
 
 world = [[], [], [], [], []]
+
+
+def add_object(o, depth=0):
+    world[depth].append(o)
+
+
+def add_objects(ol, depth=0):
+    world[depth] += ol
