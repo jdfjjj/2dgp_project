@@ -68,3 +68,83 @@ def gen(name, w, h, fn, smooth=False):
         SMOOTH.add(name)
     if REBUILD[0]:
         write_png(gp(name + '.png'), w, h, fn)
+
+
+def _inside(px, py, pts):
+    inside = False
+    j = len(pts) - 1
+    for i in range(len(pts)):
+        xi, yi = pts[i]
+        xj, yj = pts[j]
+        if (yi > py) != (yj > py) and px < (xj - xi) * (py - yi) / (yj - yi) + xi:
+            inside = not inside
+        j = i
+    return inside
+
+
+class Canvas:
+    """원·다각형으로 픽셀 그림을 그리는 도화지.
+    칸마다 '재질' 글자를 기록해 두고, 저장할 때 재질별 색 + 빛(오른쪽 위) + 외곽선을 입힌다."""
+
+    def __init__(self, w, h):
+        self.w, self.h = w, h
+        self.m = [[None] * w for _ in range(h)]
+
+    def put(self, x, y, mat):
+        x, y = int(x), int(y)
+        if 0 <= x < self.w and 0 <= y < self.h:
+            self.m[y][x] = mat
+
+    def rect(self, x1, y1, x2, y2, mat):
+        for y in range(y1, y2 + 1):
+            for x in range(x1, x2 + 1):
+                self.put(x, y, mat)
+
+    def ellipse(self, cx, cy, rx, ry, mat, keep=None):
+        for y in range(self.h):
+            for x in range(self.w):
+                if ((x + 0.5 - cx) / rx) ** 2 + ((y + 0.5 - cy) / ry) ** 2 <= 1.0:
+                    if keep is None or self.m[y][x] in keep:
+                        self.m[y][x] = mat
+
+    def poly(self, pts, mat, keep=None):
+        for y in range(self.h):
+            for x in range(self.w):
+                if _inside(x + 0.5, y + 0.5, pts) and (keep is None or self.m[y][x] in keep):
+                    self.m[y][x] = mat
+
+    def save(self, name, pal, silhouette=None, grad=False):
+        m, w, h = self.m, self.w, self.h
+
+        def mat(x, y):
+            return m[y][x] if 0 <= x < w and 0 <= y < h else None
+
+        def flat(c):
+            return isinstance(pal[c][0], (int, float))
+
+        def px(x, y):
+            gx, gy = x - 1, y - 1
+            c = mat(gx, gy)
+            if c is None:
+                if any(mat(gx + dx, gy + dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                    return silhouette or OUTLINE
+                return (0, 0, 0, 0)
+            if silhouette:
+                return silhouette
+            if flat(c):
+                return rgba(pal[c])
+            light, mid, dark = pal[c]
+            if grad and gy > h * 0.6:
+                mid = mix(mid, dark, 0.45)
+            if mat(gx + 1, gy) is None or mat(gx, gy - 1) is None or mat(gx + 1, gy - 1) is None:
+                return rgba(light)
+            if mat(gx - 1, gy) is None or mat(gx, gy + 1) is None:
+                return rgba(dark)
+            below = mat(gx, gy + 1)
+            if below is not None and below != c and not flat(below):
+                return rgba(dark)
+            col = rgba(mid)
+            if noise(gx, gy, len(name)) > 0.86:
+                col = shade(col, -8)
+            return col
+        gen(name, w + 2, h + 2, px)
