@@ -116,16 +116,17 @@ def draw():
         fx = (i * 300 + t * 12) % (W + 400) - 200
         img_draw('glow_l', fx, 150, 520, 90, 0.06)
 
-    hx, hy = 190, 160                                    # 주인공 + 금빛 구슬
-    ox, oy = hx + 40, hy + 58 + math.sin(t * 2) * 3
-    img_draw('glow_y', ox, oy, 320, 320, 0.22 + 0.04 * math.sin(t * 5))   # 주변을 비추는 빛
-    img_draw('glow_y', hx, hy + 4, 220, 50, 0.35)                         # 발밑 빛
+    hx, hy = 190, 160                                    # 주인공 + 손의 등불
+    bob = abs(math.sin(t * 2.2)) * 4
+    lx, ly = hx + 34, hy + 52 + bob                      # 등불(손) 위치
+    flick = 0.7 + 0.15 * math.sin(t * 11)                # 불빛이 살짝 일렁임
+    img_draw('glow_y', hx + 20, hy + 60, 240, 240, 0.2)  # 주인공을 감싸는 따뜻한 빛
     img_draw('shadow', hx, hy + 2, 80, 14, 0.9)
     if hero:
-        hero.draw(int(t * 4) % 4, 0, hx, hy + abs(math.sin(t * 2.2)) * 4, 140, alpha=0.82)
-    img_draw('glow_y', ox, oy, 90, 90, 0.55 + 0.1 * math.sin(t * 6))     # 빛 조각의 빛
-    img_draw('px_gold', ox, oy, 13, 13, 1.0, math.pi / 4)                 # 손에 든 빛 조각
-    img_draw('px_white', ox, oy, 5, 5, 0.9, math.pi / 4)
+        hero.draw(int(t * 4) % 4, 0, hx, hy + bob, 140, alpha=0.82)
+    img_draw('glow_y', lx, ly, 60, 60, flick)            # 등불 빛
+    img_draw('px_gold', lx, ly, 10, 12)                  # 등불
+    img_draw('px_white', lx, ly + 1, 4, 5, 0.9)
 
     ex, ey = 770, 160                                    # 적 (어둠 쪽)
     img_draw('shadow', ex, ey + 2, 100, 14, 0.9)
