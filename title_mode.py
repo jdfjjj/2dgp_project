@@ -1,10 +1,19 @@
+import math
+
 from pico2d import get_events, clear_canvas, update_canvas, SDL_QUIT, SDL_KEYDOWN, SDLK_ESCAPE
 
+import game_settings
+from game_settings import W, H
 import game_framework
+import draw_util
+from draw_util import img_draw, box, say
+
+clock = 0.0
 
 
 def init():
-    pass
+    global clock
+    clock = 0.0
 
 
 def finish():
