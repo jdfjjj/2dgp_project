@@ -37,3 +37,31 @@ def img_draw(img, x, y, w, h, alpha=1.0, rad=0.0, flip=''):
 def box(name, x1, y1, x2, y2, alpha=1.0):
     if x2 > x1 and y2 > y1:
         img_draw(name, (x1 + x2) / 2, (y1 + y2) / 2, x2 - x1, y2 - y1, alpha)
+
+
+FONT_SETS = {
+    'main': ['C:/Windows/Fonts/malgunbd.ttf', '/System/Library/Fonts/AppleSDGothicNeo.ttc',
+             os.path.join(game_settings.BASE_DIR, 'font.ttf'), 'C:/Windows/Fonts/malgun.ttf'],
+    'title': [os.path.join(game_settings.BASE_DIR, 'font_title.ttf')],
+    'clean': ['C:/Windows/Fonts/malgun.ttf', '/System/Library/Fonts/AppleSDGothicNeo.ttc'],
+    'bold': ['C:/Windows/Fonts/malgunbd.ttf', '/System/Library/Fonts/AppleSDGothicNeo.ttc'],
+}
+_fonts = {}
+
+
+def get_font(size, style='main'):
+    key = (style, size)
+    if key in _fonts:
+        return _fonts[key]
+    font = None
+    for path in FONT_SETS[style]:
+        if os.path.exists(path):
+            try:
+                font = load_font(path, size)
+                break
+            except Exception:
+                font = None
+    if font is None and style != 'main':
+        font = get_font(size, 'main')
+    _fonts[key] = font
+    return font
