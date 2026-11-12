@@ -54,3 +54,17 @@ def noise(x, y, seed=0):
 def vary(col, n, amt):
     d = (n - 0.5) * 2 * amt
     return (col[0] + d, col[1] + d, col[2] + d, col[3])
+
+
+NAMES = []
+SMOOTH = set()
+REBUILD = [False]
+OUTLINE = (12, 8, 20, 255)
+
+
+def gen(name, w, h, fn, smooth=False):
+    NAMES.append(name)
+    if smooth:
+        SMOOTH.add(name)
+    if REBUILD[0]:
+        write_png(gp(name + '.png'), w, h, fn)
