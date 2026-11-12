@@ -71,4 +71,16 @@ def draw():
         elif foes:
             foes.draw(int(t * 4 + ph) % 4, 0, ix, iy + bob - 10, 22, alpha=a + 0.1)
     draw_util.say_logo(game_settings.TITLE, W / 2, H - 150, 80)
+
+    hx, hy = 190, 160                                    # 주인공
+    img_draw('glow_y', hx + 10, hy + 70, 240, 240, 0.16)
+    img_draw('shadow', hx, hy + 2, 80, 14, 0.9)
+    if hero:
+        hero.draw(int(t * 4) % 4, 0, hx, hy + abs(math.sin(t * 2.2)) * 4, 140)
+
+    ex, ey = 770, 160                                    # 적 (큰 그림자)
+    img_draw('shadow', ex, ey + 2, 100, 14, 0.9)
+    if foes:
+        foes.draw(int(t * 3) % 4, 3, ex, ey + math.sin(t * 3) * 3, 120)
+
     update_canvas()
