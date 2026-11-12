@@ -148,3 +148,77 @@ class Canvas:
                 col = shade(col, -8)
             return col
         gen(name, w + 2, h + 2, px)
+
+
+# ─────────── 타일 (32×32) ───────────
+BARREL_PAL = {'W': ((130, 100, 120), (88, 64, 86), (54, 38, 56)), 'V': (62, 44, 62),
+              'R': ((156, 150, 176), (104, 98, 126), (62, 58, 80)),
+              'P': ((122, 94, 114), (84, 62, 82), (52, 36, 52)), 'Q': (40, 28, 42)}
+
+
+def barrel_canvas():
+    c = Canvas(26, 24)
+    for y in range(2, 24):
+        t = (y - 13) / 11.0
+        half = 10.5 - 2.0 * t * t
+        for x in range(26):
+            if abs(x + 0.5 - 13) <= half:
+                c.m[y][x] = 'W'
+    for x in (6, 11, 16, 21):
+        for y in range(5, 23):
+            if c.m[y][x] == 'W':
+                c.m[y][x] = 'V'
+    for y in (8, 9, 17, 18):
+        for x in range(26):
+            if c.m[y][x] in ('W', 'V'):
+                c.m[y][x] = 'R'
+    c.ellipse(13, 3, 10.3, 2.6, 'P')
+    c.ellipse(13, 3, 8.2, 1.6, 'Q', keep={'P'})
+    return c
+
+
+CRACK = {(5, 6), (6, 7), (7, 7), (8, 8), (8, 9), (9, 10), (10, 10), (11, 11), (11, 12),
+         (21, 20), (22, 21), (22, 22), (23, 23), (24, 23), (25, 24), (26, 25)}
+
+
+def floor_fn(th, seed, cracked):
+    base, line = rgba(th['floor']), rgba(th['line'])
+
+    def px(x, y):
+        sx, sy, lx, ly = x // 16, y // 16, x % 16, y % 16
+        if lx == 0 or ly == 0:
+            return line
+        col = shade(base, (noise(sx, sy, seed * 7) - 0.5) * 10)
+        if lx == 1 or ly == 1:
+            col = shade(col, 9)
+        elif lx == 15 or ly == 15:
+            col = shade(col, -10)
+        col = vary(col, noise(x, y, seed), 5)
+        if noise(x, y, seed + 50) > 0.93:
+            col = shade(col, -10)
+        if cracked and (x, y) in CRACK:
+            col = shade(col, -22)
+        return col
+    return px
+
+
+def wall_fn(th):
+    base, dk = rgba(th['wall']), rgba(th['wdark'])
+
+    def px(x, y):
+        row, ly = y // 8, y % 8
+        off = 8 if row % 2 else 0
+        lx = (x + off) % 16
+        if ly == 7 or lx == 15:
+            return dk
+        col = shade(base, (noise((x + off) // 16, row, 3) - 0.5) * 12)
+        if ly == 0:
+            col = shade(col, 18)
+        elif lx == 0:
+            col = shade(col, 8)
+        elif ly == 6:
+            col = shade(col, -16)
+        elif lx == 14:
+            col = shade(col, -10)
+        return vary(col, noise(x, y, 3), 5)
+    return px
