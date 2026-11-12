@@ -241,3 +241,47 @@ SOLIDS = {
     'dark': (0, 0, 0, 255), 'shade': (0, 0, 0, 170), 'panel': (18, 14, 30, 235),
     'bar_light': (190, 160, 255, 255), 'px_white': (240, 240, 255, 255), 'px_lav': (200, 170, 255, 255),
 }
+
+
+def build_images():
+    os.makedirs(game_settings.GEN_DIR, exist_ok=True)
+    ver = gp('version.txt')
+    try:
+        with open(ver) as f:
+            REBUILD[0] = f.read().strip() != ASSET_VERSION
+    except Exception:
+        REBUILD[0] = True
+    if REBUILD[0]:
+        print('그림 만드는 중... (처음 한 번만)')
+
+    barrel_canvas().save('barrel', BARREL_PAL)
+    for i, th in enumerate(game_settings.THEMES):
+        gen('t_floor%da' % i, 32, 32, floor_fn(th, i + 1, False))
+        gen('t_floor%db' % i, 32, 32, floor_fn(th, i + 1, True))
+        gen('t_wall%d' % i, 32, 32, wall_fn(th))
+    gen('glow_w', 64, 64, glow_fn((255, 250, 255)), True)
+    gen('glow_l', 64, 64, glow_fn((190, 160, 255)), True)
+    gen('shadow', 32, 10, shadow_px, True)
+    for name, col in SOLIDS.items():
+        gen(name, 1, 1, lambda x, y, col=col: col)
+
+    if REBUILD[0]:
+        with open(ver, 'w') as f:
+            f.write(ASSET_VERSION)
+
+
+def load_images():
+    for n in NAMES:
+        draw_util.set_smooth(n in SMOOTH)
+        draw_util.IMG[n] = load_image(gp(n + '.png'))
+    draw_util.set_smooth(False)
+
+
+def prepare():
+    """캔버스를 열기 전에: 그림 파일이 없으면 만든다"""
+    build_images()
+
+
+def load():
+    """캔버스를 연 뒤에: 그림을 불러온다"""
+    load_images()
