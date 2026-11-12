@@ -8,7 +8,7 @@ from pico2d import load_image
 import game_settings
 import draw_util
 
-ASSET_VERSION = 'w1b'
+ASSET_VERSION = 'w1c'
 
 
 def gp(name):
@@ -225,9 +225,11 @@ def wall_fn(th):
 
 
 # ─────────── 빛 효과 ───────────
-def glow_fn(color):
+def glow_fn(color, size=128):
+    c = (size - 1) / 2
+
     def px(x, y):
-        a = max(0.0, 1.0 - math.hypot(x - 31.5, y - 31.5) / 31.5) ** 2
+        a = max(0.0, 1.0 - math.hypot(x - c, y - c) / c) ** 2
         return (color[0], color[1], color[2], 255 * a)
     return px
 
@@ -260,9 +262,9 @@ def build_images():
         gen('t_floor%da' % i, 32, 32, floor_fn(th, i + 1, False))
         gen('t_floor%db' % i, 32, 32, floor_fn(th, i + 1, True))
         gen('t_wall%d' % i, 32, 32, wall_fn(th))
-    gen('glow_w', 64, 64, glow_fn((255, 250, 255)), True)
-    gen('glow_l', 64, 64, glow_fn((190, 160, 255)), True)
-    gen('glow_y', 64, 64, glow_fn((255, 210, 90)), True)
+    gen('glow_w', 128, 128, glow_fn((255, 250, 255)), True)
+    gen('glow_l', 128, 128, glow_fn((190, 160, 255)), True)
+    gen('glow_y', 128, 128, glow_fn((255, 210, 90)), True)
     gen('shadow', 32, 10, shadow_px, True)
     for name, col in SOLIDS.items():
         gen(name, 1, 1, lambda x, y, col=col: col)
