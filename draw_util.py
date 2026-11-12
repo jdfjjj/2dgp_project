@@ -45,6 +45,7 @@ FONT_SETS = {
     'title': [os.path.join(game_settings.BASE_DIR, 'font_title.ttf')],
     'clean': ['C:/Windows/Fonts/malgun.ttf', '/System/Library/Fonts/AppleSDGothicNeo.ttc'],
     'bold': ['C:/Windows/Fonts/malgunbd.ttf', '/System/Library/Fonts/AppleSDGothicNeo.ttc'],
+    'pixel': [os.path.join(game_settings.BASE_DIR, 'font1.ttf')],
 }
 _fonts = {}
 
