@@ -110,6 +110,9 @@ def draw():
         elif foes:
             foes.draw(int(t * 4 + ph) % 4, 0, ix, iy + bob - 10, 22, alpha=a + 0.1)
     draw_util.say_logo(game_settings.TITLE, W / 2, H - 140, 60)
+    for i in range(4):                                   # 바닥 안개
+        fx = (i * 300 + t * 12) % (W + 400) - 200
+        img_draw('glow_l', fx, 150, 520, 90, 0.06)
 
     hx, hy = 190, 160                                    # 주인공
     img_draw('glow_y', hx + 10, hy + 70, 240, 240, 0.16)
