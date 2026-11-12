@@ -222,3 +222,22 @@ def wall_fn(th):
             col = shade(col, -10)
         return vary(col, noise(x, y, 3), 5)
     return px
+
+
+# ─────────── 빛 효과 ───────────
+def glow_fn(color):
+    def px(x, y):
+        a = max(0.0, 1.0 - math.hypot(x - 31.5, y - 31.5) / 31.5) ** 2
+        return (color[0], color[1], color[2], 255 * a)
+    return px
+
+
+def shadow_px(x, y):
+    d = ((x - 15.5) / 16) ** 2 + ((y - 4.5) / 5) ** 2
+    return (0, 0, 0, 120 * (1 - d)) if d < 1 else (0, 0, 0, 0)
+
+
+SOLIDS = {
+    'dark': (0, 0, 0, 255), 'shade': (0, 0, 0, 170), 'panel': (18, 14, 30, 235),
+    'bar_light': (190, 160, 255, 255), 'px_white': (240, 240, 255, 255), 'px_lav': (200, 170, 255, 255),
+}
