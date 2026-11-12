@@ -39,16 +39,21 @@ def quit():
 
 
 def run(start_mode):
-    global running, stack
+    global running, stack, frame_time
     running = True
     stack = [start_mode]
     start_mode.init()
 
+    frame_time = 0.0
+    current_time = time.time()
     while running:
         stack[-1].handle_events()
         stack[-1].update()
         stack[-1].draw()
         delay(0.004)                         # CPU를 너무 많이 쓰지 않게 잠깐 쉼
+        now = time.time()
+        frame_time = min(now - current_time, MAX_FRAME_TIME)
+        current_time = now
 
     while len(stack) > 0:
         stack[-1].finish()
