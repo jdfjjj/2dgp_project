@@ -36,3 +36,12 @@ START_LIGHT = 8.0                # 층 시작할 때 빛
 CELL = 16                        # 어둠 칸 크기 (버벅이면 24로)
 PLAYER_SCALE = 2
 BASE_STATS = dict(speed=kmph_to_pps(PLAYER_SPEED_KMPH), light_cap=20.0, sight=190.0)
+
+# ─────────── 층 배경 테마 ───────────
+THEMES = [
+    dict(name='VIOLET CRYPT', floor=(44, 38, 62), line=(28, 24, 42), wall=(74, 64, 102), wdark=(36, 30, 54)),
+    dict(name='MOSSY HALLS', floor=(36, 46, 44), line=(22, 30, 28), wall=(60, 80, 72), wdark=(28, 40, 36)),
+    dict(name='EMBER VAULT', floor=(56, 36, 36), line=(34, 20, 22), wall=(94, 56, 52), wdark=(46, 26, 26)),
+    dict(name='FROST CELLAR', floor=(36, 46, 64), line=(22, 28, 42), wall=(68, 86, 116), wdark=(32, 40, 58)),
+    dict(name='THE ABYSS', floor=(30, 22, 40), line=(16, 10, 24), wall=(58, 40, 80), wdark=(24, 16, 36)),
+]
