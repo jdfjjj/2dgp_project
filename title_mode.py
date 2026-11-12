@@ -86,14 +86,16 @@ def update():
 
 def draw_button(label, x, y, selected):
     w, h = BTN_W, BTN_H
+    x1, x2, y1, y2 = x - w / 2, x + w / 2, y - h / 2, y + h / 2
     if selected:
-        img_draw('glow_y', x, y, w * 1.3, h * 2.4, 0.12 + 0.06 * math.sin(clock * 4))
-        box('px_gold', x - w / 2 - 2, y - h / 2 - 2, x + w / 2 + 2, y + h / 2 + 2)
-        box('bar_gold', x - w / 2, y - h / 2, x + w / 2, y + h / 2)
-        draw_str(label, x, y, 22, 'center', [(0, 0, COLORS['k'])], 'pixel')
+        img_draw('glow_y', x, y, w * 1.25, h * 2.2, 0.10 + 0.05 * math.sin(clock * 4))
+        box('px_gold', x1 - 2, y1 - 2, x2 + 2, y2 + 2)              # 금색 테두리
+        box('panel', x1, y1, x2, y2)
+        box('px_gold', x1, y1, x2, y2, 0.08)                        # 안쪽에 아주 옅은 금빛
+        draw_str(label, x, y, 22, 'center', [(2, -2, (0, 0, 0)), (0, 0, COLORS['y'])], 'pixel')
     else:
-        box('px_white', x - w / 2 - 1, y - h / 2 - 1, x + w / 2 + 1, y + h / 2 + 1, 0.25)
-        box('panel', x - w / 2, y - h / 2, x + w / 2, y + h / 2)
+        box('px_white', x1 - 1, y1 - 1, x2 + 1, y2 + 1, 0.12)
+        box('panel', x1, y1, x2, y2)
         draw_str(label, x, y, 22, 'center', [(0, 0, COLORS['g'])], 'pixel')
 
 
