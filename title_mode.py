@@ -35,8 +35,8 @@ def init():
     global clock, sel, hero, foes, icons
     clock = 0.0
     sel = 0
-    hero = sheet.load('player.png', 4, 8, pixel=70)
-    foes = sheet.load('enemies.png', 4, 5, per_row=True, pixel=46)
+    hero = sheet.load('player.png', 4, 8, pixel=58)
+    foes = sheet.load('enemies.png', 4, 5, per_row=True, pixel=35)
     icons = sheet.load('enemies.png', 4, 5, per_row=True, pixel=22)
 
 
@@ -118,25 +118,25 @@ def draw():
         fx = (i * 300 + t * 12) % (W + 400) - 200
         img_draw('glow_l', fx, 150, 520, 90, 0.06)
 
-    hx, hy = 190, 160                                    # 주인공 + 손의 등불
+    hx, hy = 190, 160                                    # 주인공 + 손의 빛
     bob = math.sin(t * 1.5) * 1.5                        # 아주 천천히 숨쉬듯
-    lx, ly = hx + 22, hy + 38 + bob                      # 손의 빛 위치
-    flick = 0.7 + 0.15 * math.sin(t * 11)                # 불빛이 살짝 일렁임
-    img_draw('glow_y', hx + 20, hy + 60, 240, 240, 0.2)  # 주인공을 감싸는 따뜻한 빛
-    img_draw('shadow', hx, hy + 2, 80, 14, 0.9)
+    lx, ly = hx + 18, hy + 32 + bob                      # 손의 빛 위치
+    flick = 0.7 + 0.15 * math.sin(t * 11)                # 빛이 살짝 일렁임
+    img_draw('glow_y', hx + 16, hy + 50, 210, 210, 0.2)  # 주인공을 감싸는 따뜻한 빛
+    img_draw('shadow', hx, hy + 2, 66, 12, 0.9)
     if hero:
-        hero.draw(0, 0, hx, hy + bob, 140, alpha=0.82)   # 한 장으로 고정
-    img_draw('glow_y', lx, ly, 64, 64, flick)            # 손의 빛 (넓게 번짐)
-    img_draw('glow_y', lx, ly, 26, 26, 0.9)              # 밝은 중심
-    img_draw('glow_w', lx, ly, 12, 12, 0.85 + 0.1 * math.sin(t * 11))   # 하얀 심지
+        hero.draw(0, 0, hx, hy + bob, 116, alpha=0.82)   # 한 장으로 고정
+    img_draw('glow_y', lx, ly, 56, 56, flick)            # 손의 빛 (넓게 번짐)
+    img_draw('glow_y', lx, ly, 22, 22, 0.9)              # 밝은 중심
+    img_draw('glow_w', lx, ly, 10, 10, 0.85 + 0.1 * math.sin(t * 11))   # 하얀 심지
 
     ex, ey = 770, 160                                    # 적 (어둠 쪽)
-    img_draw('shadow', ex, ey + 2, 100, 14, 0.9)
+    img_draw('shadow', ex, ey + 2, 80, 12, 0.9)
     if foes:
-        foes.draw(int(t * 3) % 4, 3, ex, ey + math.sin(t * 3) * 3, 120, alpha=0.7)
+        foes.draw(int(t * 3) % 4, 3, ex, ey + math.sin(t * 3) * 3, 104, alpha=0.7)
     eb = math.sin(t * 3) * 3
-    for dx in (38, 60):                                  # 눈빛
-        img_draw('glow_y', ex + dx, ey + 55 + eb, 30, 30, 0.45 + 0.2 * math.sin(t * 5))
+    for dx in (29, 46):                                  # 눈빛
+        img_draw('glow_y', ex + dx, ey + 42 + eb, 24, 24, 0.45 + 0.2 * math.sin(t * 5))
 
     for i, label in enumerate(MENU):
         draw_button(label, W / 2, BTN_Y - i * BTN_GAP, i == sel)
