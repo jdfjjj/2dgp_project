@@ -36,3 +36,20 @@ def pop_mode():
 def quit():
     global running
     running = False
+
+
+def run(start_mode):
+    global running, stack
+    running = True
+    stack = [start_mode]
+    start_mode.init()
+
+    while running:
+        stack[-1].handle_events()
+        stack[-1].update()
+        stack[-1].draw()
+        delay(0.004)                         # CPU를 너무 많이 쓰지 않게 잠깐 쉼
+
+    while len(stack) > 0:
+        stack[-1].finish()
+        stack.pop()
