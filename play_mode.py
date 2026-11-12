@@ -2,16 +2,20 @@ from pico2d import get_events, clear_canvas, update_canvas, SDL_QUIT, SDL_KEYDOW
 
 from game_settings import W, H
 import game_framework
-from draw_util import box, say
+import game_world
+import level
+from draw_util import box
 import title_mode
 
 
 def init():
-    pass
+    game_world.clear()
+    level.build()
+    game_world.add_object(level.LevelView(), game_world.LAYER_FLOOR)
 
 
 def finish():
-    pass
+    game_world.clear()
 
 
 def pause():
@@ -31,12 +35,11 @@ def handle_events():
 
 
 def update():
-    pass
+    game_world.update()
 
 
 def draw():
     clear_canvas()
     box('dark', 0, 0, W, H)
-    say('플레이 모드', W / 2, H / 2 + 20, 32, 'l', 'center')
-    say('ESC를 누르면 타이틀로 돌아가요', W / 2, H / 2 - 30, 18, 'g', 'center')
+    game_world.render()
     update_canvas()
