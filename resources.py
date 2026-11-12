@@ -8,7 +8,7 @@ from pico2d import load_image
 import game_settings
 import draw_util
 
-ASSET_VERSION = 'w1'
+ASSET_VERSION = 'w1b'
 
 
 def gp(name):
@@ -240,6 +240,7 @@ def shadow_px(x, y):
 SOLIDS = {
     'dark': (0, 0, 0, 255), 'shade': (0, 0, 0, 170), 'panel': (18, 14, 30, 235),
     'bar_light': (190, 160, 255, 255), 'px_white': (240, 240, 255, 255), 'px_lav': (200, 170, 255, 255),
+    'px_gold': (255, 215, 110, 255), 'bar_gold': (255, 230, 140, 255),
 }
 
 
@@ -261,6 +262,7 @@ def build_images():
         gen('t_wall%d' % i, 32, 32, wall_fn(th))
     gen('glow_w', 64, 64, glow_fn((255, 250, 255)), True)
     gen('glow_l', 64, 64, glow_fn((190, 160, 255)), True)
+    gen('glow_y', 64, 64, glow_fn((255, 210, 90)), True)
     gen('shadow', 32, 10, shadow_px, True)
     for name, col in SOLIDS.items():
         gen(name, 1, 1, lambda x, y, col=col: col)
