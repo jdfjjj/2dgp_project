@@ -17,3 +17,11 @@ def pause():
 
 def resume():
     pass
+
+
+def handle_events():
+    for e in get_events():
+        if e.type == SDL_QUIT:
+            game_framework.quit()
+        elif e.type == SDL_KEYDOWN and e.key == SDLK_ESCAPE:
+            game_framework.quit()
