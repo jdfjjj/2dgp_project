@@ -120,15 +120,15 @@ def draw():
 
     hx, hy = 190, 160                                    # 주인공 + 손의 등불
     bob = math.sin(t * 1.5) * 1.5                        # 아주 천천히 숨쉬듯
-    lx, ly = hx + 34, hy + 52 + bob                      # 등불(손) 위치
+    lx, ly = hx + 22, hy + 38 + bob                      # 손의 빛 위치
     flick = 0.7 + 0.15 * math.sin(t * 11)                # 불빛이 살짝 일렁임
     img_draw('glow_y', hx + 20, hy + 60, 240, 240, 0.2)  # 주인공을 감싸는 따뜻한 빛
     img_draw('shadow', hx, hy + 2, 80, 14, 0.9)
     if hero:
         hero.draw(0, 0, hx, hy + bob, 140, alpha=0.82)   # 한 장으로 고정
-    img_draw('glow_y', lx, ly, 60, 60, flick)            # 등불 빛
-    img_draw('px_gold', lx, ly, 10, 12)                  # 등불
-    img_draw('px_white', lx, ly + 1, 4, 5, 0.9)
+    img_draw('glow_y', lx, ly, 64, 64, flick)            # 손의 빛 (넓게 번짐)
+    img_draw('glow_y', lx, ly, 26, 26, 0.9)              # 밝은 중심
+    img_draw('glow_w', lx, ly, 12, 12, 0.85 + 0.1 * math.sin(t * 11))   # 하얀 심지
 
     ex, ey = 770, 160                                    # 적 (어둠 쪽)
     img_draw('shadow', ex, ey + 2, 100, 14, 0.9)
