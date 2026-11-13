@@ -9,7 +9,7 @@ import level
 import sheet
 from draw_util import img_draw
 
-PIXEL = 37                       # 도트 그림의 주인공 키 (px)
+PIXEL = 33             # 도트 그림의 주인공 키 (px)
 PLAYER_HEIGHT = PIXEL * 2        # 화면에 보일 키 = 도트 2배
 ROWS = {                         # player.png 줄 번호: (바라보는 쪽, 동작)
     ('side', 'idle'): 0, ('side', 'walk'): 1,
