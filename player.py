@@ -1,16 +1,57 @@
 import math
 
+from transitions import Machine
 from pico2d import SDL_KEYDOWN, SDL_KEYUP
 
 import game_settings
 import game_framework
+import level
 import sheet
 from draw_util import img_draw
 
 PIXEL = 37                       # 도트 그림의 주인공 키 (px)
 PLAYER_HEIGHT = PIXEL * 2        # 화면에 보일 키 = 도트 2배
-ROW_IDLE = 0                     # player.png에서 옆모습 대기 줄
+ROW_IDLE, ROW_WALK = 0, 1        # player.png 줄: 옆모습 대기, 옆모습 걷기
 SPEED = 180                      # 1초에 움직이는 거리 (px)
+IDLE_FPS, WALK_FPS = 3, 8        # 1초에 넘기는 애니메이션 장 수
+
+
+class Idle:
+    """서 있기: 대기 동작, 이동키를 누르면 RUN으로"""
+
+    def enter(self, p):
+        p.frame = 0.0
+
+    def exit(self, p):
+        pass
+
+    def do(self, p):
+        p.frame = (p.frame + IDLE_FPS * game_framework.frame_time) % 4
+        if p.input_dir() != (0, 0):
+            p.move_start()
+
+    def draw(self, p):
+        p.draw_frame(ROW_IDLE, int(p.frame))
+
+
+class Run:
+    """걷기: 이동하면서 걷기 동작, 이동키를 다 떼면 IDLE로"""
+
+    def enter(self, p):
+        p.frame = 0.0
+
+    def exit(self, p):
+        pass
+
+    def do(self, p):
+        if p.input_dir() == (0, 0):
+            p.move_stop()
+            return
+        p.frame = (p.frame + WALK_FPS * game_framework.frame_time) % 4
+        p.walk()
+
+    def draw(self, p):
+        p.draw_frame(ROW_WALK, int(p.frame))
 
 
 class Player:
