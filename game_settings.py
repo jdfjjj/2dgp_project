@@ -1,5 +1,5 @@
 import os
-from pico2d import SDLK_w, SDLK_a, SDLK_s, SDLK_d, SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT
+from pico2d import SDLK_w, SDLK_a, SDLK_s, SDLK_d
 
 # ─────────── 화면 / 경로 ───────────
 W, H = 960, 640
@@ -12,10 +12,10 @@ GEN_DIR = os.path.join(BASE_DIR, 'escape_assets')
 TITLE = 'IN THE DARK'
 
 # ─────────── 키 ───────────
-KEY_UP = (SDLK_w, SDLK_UP)
-KEY_DOWN = (SDLK_s, SDLK_DOWN)
-KEY_LEFT = (SDLK_a, SDLK_LEFT)
-KEY_RIGHT = (SDLK_d, SDLK_RIGHT)
+KEY_UP = (SDLK_w,)
+KEY_DOWN = (SDLK_s,)
+KEY_LEFT = (SDLK_a,)
+KEY_RIGHT = (SDLK_d,)
 KEY_MOVE = KEY_UP + KEY_DOWN + KEY_LEFT + KEY_RIGHT
 
 # ─────────── 물리 단위 (16강) : 타일 한 칸(32px) = 0.5m ───────────
