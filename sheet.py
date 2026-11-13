@@ -9,7 +9,7 @@ import resources
 IMG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'images')
 ALPHA_CUT = bytes(0 if a <= 40 else 1 for a in range(256))     # 거의 투명한 점은 무시
 ON = b'\x01'
-PIXEL_VER = 2                    # 도트 변환 방식이 바뀌면 숫자를 올려서 그림을 다시 만듦
+PIXEL_VER = 3                    # 도트 변환 방식이 바뀌면 숫자를 올려서 그림을 다시 만듦
 
 
 def _set_smooth(on):
@@ -86,6 +86,15 @@ def _pixelate(w, h, px, f):
     return nw, nh, out
 
 
+def _crop(w, px, left, top, bw, bh):
+    """큰 그림에서 사각형 영역만 잘라 냄"""
+    out = bytearray()
+    for y in range(top, top + bh):
+        s = (y * w + left) * 4
+        out += px[s:s + bw * 4]
+    return bytes(out)
+
+
 def _bands(flags, gap=12):
     """그림이 있는 줄들을 덩어리로 묶음"""
     bands, start, last = [], None, None
@@ -148,10 +157,13 @@ def _analyze(rows_a, cols, rows, name):
     return frames, row_h
 
 
-def _pixel_version(src, cols, rows, pixel):
-    """원본을 줄여서 '첫 줄 키 = pixel' 인 도트 그림을 만들어 escape_assets에 저장 (처음 한 번만)"""
+def _pixel_version(src, cols, rows, pixel, groups=None):
+    """원본을 줄여서 도트 그림을 만들어 escape_assets에 저장 (처음 한 번만).
+    groups: 같은 키로 맞출 줄 묶음 (예: 옆모습 줄들, 뒷모습 줄들, 앞모습 줄들).
+            묶음마다 첫 줄의 보통 키가 pixel이 되도록 따로 줄임. 없으면 전부 첫 줄 기준"""
     stem = os.path.splitext(os.path.basename(src))[0]
-    dst = os.path.join(game_settings.GEN_DIR, '%s_px%d_v%d.png' % (stem, pixel, PIXEL_VER))
+    tag = '_g' + ''.join(str(g[0]) for g in groups) if groups else ''
+    dst = os.path.join(game_settings.GEN_DIR, '%s_px%d%s_v%d.png' % (stem, pixel, tag, PIXEL_VER))
     if os.path.exists(dst) and os.path.getmtime(dst) >= os.path.getmtime(src):
         return dst
     got = _surface_bytes(src)
@@ -159,22 +171,39 @@ def _pixel_version(src, cols, rows, pixel):
         return src
     w, h, px = got
     rows_a = [px[y * w * 4 + 3: (y + 1) * w * 4: 4].translate(ALPHA_CUT) for y in range(h)]
-    _, row_h = _analyze(rows_a, cols, rows, os.path.basename(src))
-    f = row_h[0] / float(pixel)
-    if f <= 1:
-        return src
+    frames, row_h = _analyze(rows_a, cols, rows, os.path.basename(src))
+    factor = {}
+    for g in (groups or [tuple(range(rows))]):
+        f = max(1.0, row_h[g[0]] / float(pixel))
+        for r in g:
+            factor[r] = f
     print('도트 그림 만드는 중... %s (처음 한 번만)' % os.path.basename(src))
-    nw, nh, out = _pixelate(w, h, px, f)
+
+    small = {}                                       # 칸마다 따로 줄인 그림
+    for (c, r), fr in frames.items():
+        if fr:
+            left, top, bw, bh, _ = fr
+            small[(c, r)] = _pixelate(bw, bh, _crop(w, px, left, top, bw, bh), factor.get(r, 1.0))
+    cw = max(s[0] for s in small.values()) + 6       # 새 칸 크기 (여유 포함)
+    ch = max(s[1] for s in small.values()) + 6
+    ow, oh = cw * cols, ch * rows
+    out = bytearray(ow * oh * 4)
+    for (c, r), (nw, nh, img) in small.items():      # 칸 가운데, 아래쪽에 맞춰 붙임
+        ox = c * cw + (cw - nw) // 2
+        oy = r * ch + (ch - nh - 3)
+        for y in range(nh):
+            d = ((oy + y) * ow + ox) * 4
+            out[d:d + nw * 4] = img[y * nw * 4:(y + 1) * nw * 4]
     os.makedirs(game_settings.GEN_DIR, exist_ok=True)
-    resources.write_png(dst, nw, nh, lambda x, y: out[(y * nw + x) * 4:(y * nw + x) * 4 + 4])
+    resources.write_png(dst, ow, oh, lambda x, y: out[(y * ow + x) * 4:(y * ow + x) * 4 + 4])
     return dst
 
 
 class Sheet:
-    def __init__(self, path, cols, rows, per_row=False, pixel=None):
+    def __init__(self, path, cols, rows, per_row=False, pixel=None, groups=None):
         name = os.path.basename(path)
         if pixel:
-            path = _pixel_version(path, cols, rows, pixel)
+            path = _pixel_version(path, cols, rows, pixel, groups)
         self.pixel = bool(pixel)
         _set_smooth(not self.pixel)               # 도트는 부드럽게 늘리지 않고 계단식으로 키움
         self.image = load_image(path)
@@ -216,10 +245,10 @@ class Sheet:
 _cache = {}
 
 
-def load(name, cols, rows, per_row=False, pixel=None):
+def load(name, cols, rows, per_row=False, pixel=None, groups=None):
     """images/name 이 있으면 Sheet, 없으면 None (한 번만 불러옴). pixel을 주면 도트 버전으로"""
-    key = (name, pixel)
+    key = (name, pixel, groups)
     if key not in _cache:
         path = os.path.join(IMG_DIR, name)
-        _cache[key] = Sheet(path, cols, rows, per_row, pixel) if os.path.exists(path) else None
+        _cache[key] = Sheet(path, cols, rows, per_row, pixel, groups) if os.path.exists(path) else None
     return _cache[key]
