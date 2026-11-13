@@ -36,6 +36,8 @@ def handle_events():
             game_framework.quit()
         elif e.type == SDL_KEYDOWN and e.key == SDLK_ESCAPE:
             game_framework.change_mode(title_mode)
+        else:
+            server.player.handle_event(e)
 
 
 def update():
