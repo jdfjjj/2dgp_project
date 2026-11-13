@@ -4,6 +4,8 @@ from game_settings import W, H
 import game_framework
 import game_world
 import level
+import server
+from player import Player
 from draw_util import box
 import title_mode
 
@@ -12,6 +14,8 @@ def init():
     game_world.clear()
     level.build()
     game_world.add_object(level.LevelView(), game_world.LAYER_FLOOR)
+    server.player = Player(*level.start)
+    game_world.add_object(server.player, game_world.LAYER_CHAR)
 
 
 def finish():
