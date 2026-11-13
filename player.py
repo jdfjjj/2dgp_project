@@ -79,6 +79,7 @@ class Player:
         self.frame = 0.0
         self.held = set()        # 지금 누르고 있는 이동키
         self.mouse = (x + 100, y)     # 마우스 위치 (게임 화면 좌표)
+        self.mouse_aim = False        # 멈춘 뒤 마우스를 움직였을 때만 마우스 쪽을 봄
 
         # 13강 상태 머신: 언제 어떤 상태로 바뀌는지는 transitions가, 상태마다 할 일은 상태 클래스가
         self.states = {'IDLE': Idle(), 'RUN': Run()}
@@ -102,6 +103,7 @@ class Player:
             self.held.discard(e.key)
         elif e.type == SDL_MOUSEMOTION:
             self.mouse = (e.x, game_settings.H - 1 - e.y)
+            self.mouse_aim = True
 
     def input_dir(self):
         held = self.held
@@ -110,17 +112,20 @@ class Player:
         return mx, my
 
     def update_aim(self):
-        """걷는 중엔 걷는 방향, 서 있을 땐 마우스 쪽을 바라봄"""
+        """걷는 중엔 걷는 방향, 멈춘 뒤 마우스를 움직이면 마우스 쪽을 바라봄"""
         mx, my = self.input_dir()
         if mx or my:
             ln = math.hypot(mx, my)
             ax, ay = mx / ln, my / ln
-        else:
+            self.mouse_aim = False                 # 걷는 동안은 마우스 방향을 쓰지 않음
+        elif self.mouse_aim:
             dx, dy = self.mouse[0] - self.x, self.mouse[1] - (self.y + 20)
             d = math.hypot(dx, dy)
             if d < 8:                              # 커서가 캐릭터 위에 있으면 그대로
                 return
             ax, ay = dx / d, dy / d
+        else:
+            return                                 # 멈춘 뒤 마우스를 안 움직였으면 걷던 방향 그대로
         self.fx, self.fy = ax, ay
         if abs(ax) > 0.15:
             self.face = 1 if ax > 0 else -1
