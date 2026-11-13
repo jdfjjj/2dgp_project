@@ -99,8 +99,7 @@ class Player:
             self.face = mx
         ln = math.hypot(mx, my)                    # 대각선도 같은 속도로
         d = SPEED * game_framework.frame_time
-        self.x += mx / ln * d
-        self.y += my / ln * d
+        level.move(self, mx / ln * d, my / ln * d)
 
     def feet(self):
         return self.y - self.r
