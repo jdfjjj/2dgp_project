@@ -64,8 +64,22 @@ class Player:
         self.r = 12              # 충돌 반지름
         self.face = 1            # 1: 오른쪽을 봄, -1: 왼쪽을 봄
         self.frame = 0.0
-        self.clock = 0.0
         self.held = set()        # 지금 누르고 있는 이동키
+
+        # 13강 상태 머신: 언제 어떤 상태로 바뀌는지는 transitions가, 상태마다 할 일은 상태 클래스가
+        self.states = {'IDLE': Idle(), 'RUN': Run()}
+        self.machine = Machine(model=self, states=list(self.states), initial='IDLE',
+                               auto_transitions=False, ignore_invalid_triggers=True,
+                               before_state_change='_exit_state', after_state_change='_enter_state')
+        self.machine.add_transition('move_start', 'IDLE', 'RUN')
+        self.machine.add_transition('move_stop', 'RUN', 'IDLE')
+        self.states[self.state].enter(self)
+
+    def _exit_state(self):
+        self.states[self.state].exit(self)
+
+    def _enter_state(self):
+        self.states[self.state].enter(self)
 
     def handle_event(self, e):
         if e.type == SDL_KEYDOWN and e.key in game_settings.KEY_MOVE:
@@ -79,22 +93,24 @@ class Player:
         my = int(any(k in held for k in game_settings.KEY_UP)) - int(any(k in held for k in game_settings.KEY_DOWN))
         return mx, my
 
+    def walk(self):
+        mx, my = self.input_dir()
+        if mx:
+            self.face = mx
+        ln = math.hypot(mx, my)                    # 대각선도 같은 속도로
+        d = SPEED * game_framework.frame_time
+        self.x += mx / ln * d
+        self.y += my / ln * d
+
     def feet(self):
         return self.y - self.r
 
     def update(self):
-        dt = game_framework.frame_time
-        self.clock += dt
-        self.frame = (self.clock * 3) % 4          # 대기 동작 (1초에 3장)
-        mx, my = self.input_dir()
-        if mx or my:
-            if mx:
-                self.face = mx
-            ln = math.hypot(mx, my)                # 대각선도 같은 속도로
-            self.x += mx / ln * SPEED * dt
-            self.y += my / ln * SPEED * dt
+        self.states[self.state].do(self)
 
     def draw(self):
         img_draw('shadow', self.x, self.feet() + 2, 34, 9, 0.9)
-        Player.image.draw(int(self.frame), ROW_IDLE, self.x, self.feet(), PLAYER_HEIGHT,
-                          '' if self.face > 0 else 'h')
+        self.states[self.state].draw(self)
+
+    def draw_frame(self, row, col):
+        Player.image.draw(col, row, self.x, self.feet(), PLAYER_HEIGHT, '' if self.face > 0 else 'h')
