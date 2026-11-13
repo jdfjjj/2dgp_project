@@ -12,7 +12,7 @@ from draw_util import img_draw
 PIXEL = 37                       # 도트 그림의 주인공 키 (px)
 PLAYER_HEIGHT = PIXEL * 2        # 화면에 보일 키 = 도트 2배
 ROW_IDLE, ROW_WALK = 0, 1        # player.png 줄: 옆모습 대기, 옆모습 걷기
-SPEED = 180                      # 1초에 움직이는 거리 (px)
+SPEED = game_settings.kmph_to_pps(game_settings.PLAYER_SPEED_KMPH)   # 16강: 10.7 km/h → 약 190 px/s
 IDLE_FPS, WALK_FPS = 3, 8        # 1초에 넘기는 애니메이션 장 수
 
 
