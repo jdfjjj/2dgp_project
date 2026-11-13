@@ -18,3 +18,15 @@ class Player:
         self.face = 1            # 1: 오른쪽을 봄, -1: 왼쪽을 봄
         self.frame = 0.0
         self.clock = 0.0
+
+    def feet(self):
+        return self.y - self.r
+
+    def update(self):
+        self.clock += game_framework.frame_time
+        self.frame = (self.clock * 3) % 4          # 대기 동작 (1초에 3장)
+
+    def draw(self):
+        img_draw('shadow', self.x, self.feet() + 2, 34, 9, 0.9)
+        Player.image.draw(int(self.frame), ROW_IDLE, self.x, self.feet(), PLAYER_HEIGHT,
+                          '' if self.face > 0 else 'h')
