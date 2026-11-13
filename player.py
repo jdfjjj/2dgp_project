@@ -11,7 +11,11 @@ from draw_util import img_draw
 
 PIXEL = 37                       # 도트 그림의 주인공 키 (px)
 PLAYER_HEIGHT = PIXEL * 2        # 화면에 보일 키 = 도트 2배
-ROW_IDLE, ROW_WALK = 0, 1        # player.png 줄: 옆모습 대기, 옆모습 걷기
+ROWS = {                         # player.png 줄 번호: (바라보는 쪽, 동작)
+    ('side', 'idle'): 0, ('side', 'walk'): 1,
+    ('back', 'idle'): 4, ('back', 'walk'): 5,
+    ('front', 'idle'): 6, ('front', 'walk'): 7,
+}
 SPEED = game_settings.kmph_to_pps(game_settings.PLAYER_SPEED_KMPH)   # 16강: 10.7 km/h → 약 190 px/s
 IDLE_FPS = 3                     # 대기 동작: 1초에 넘기는 장 수
 
@@ -37,7 +41,7 @@ class Idle:
             p.move_start()
 
     def draw(self, p):
-        p.draw_frame(ROW_IDLE, int(p.frame))
+        p.draw_frame('idle', int(p.frame))
 
 
 class Run:
@@ -57,7 +61,7 @@ class Run:
         p.walk()
 
     def draw(self, p):
-        p.draw_frame(ROW_WALK, int(p.frame))
+        p.draw_frame('walk', int(p.frame))
 
 
 class Player:
@@ -138,5 +142,7 @@ class Player:
         img_draw('shadow', self.x, self.feet() + 2, 34, 9, 0.9)
         self.states[self.state].draw(self)
 
-    def draw_frame(self, row, col):
-        Player.image.draw(col, row, self.x, self.feet(), PLAYER_HEIGHT, '' if self.face > 0 else 'h')
+    def draw_frame(self, kind, col):
+        row = ROWS[(self.view, kind)]
+        flip = 'h' if self.view == 'side' and self.face < 0 else ''
+        Player.image.draw(col, row, self.x, self.feet(), PLAYER_HEIGHT, flip)
