@@ -13,7 +13,13 @@ PIXEL = 37                       # 도트 그림의 주인공 키 (px)
 PLAYER_HEIGHT = PIXEL * 2        # 화면에 보일 키 = 도트 2배
 ROW_IDLE, ROW_WALK = 0, 1        # player.png 줄: 옆모습 대기, 옆모습 걷기
 SPEED = game_settings.kmph_to_pps(game_settings.PLAYER_SPEED_KMPH)   # 16강: 10.7 km/h → 약 190 px/s
-IDLE_FPS, WALK_FPS = 3, 8        # 1초에 넘기는 애니메이션 장 수
+IDLE_FPS = 3                     # 대기 동작: 1초에 넘기는 장 수
+
+
+def walk_frames_per_second():
+    """16강: 1초에 넘길 걷기 그림 장 수 = 속도(m/s) / 한 걸음 주기 길이(m) × 한 주기 장 수"""
+    speed_mps = SPEED / game_settings.PIXEL_PER_METER
+    return speed_mps / game_settings.STRIDE_LENGTH_M * game_settings.WALK_FRAMES_PER_STRIDE
 
 
 class Idle:
@@ -47,7 +53,7 @@ class Run:
         if p.input_dir() == (0, 0):
             p.move_stop()
             return
-        p.frame = (p.frame + WALK_FPS * game_framework.frame_time) % 4
+        p.frame = (p.frame + walk_frames_per_second() * game_framework.frame_time) % 4
         p.walk()
 
     def draw(self, p):
