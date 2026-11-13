@@ -140,6 +140,15 @@ class Player:
     def feet(self):
         return self.y - self.r
 
+    def hand(self):
+        """손에 든 빛의 위치 (바라보는 쪽에 따라 다름)"""
+        f = self.feet()
+        if self.view == 'back':
+            return self.x + 7, f + 25
+        if self.view == 'front':
+            return self.x + 11, f + 16
+        return self.x + self.face * 12, f + 17
+
     def update(self):
         self.update_aim()
         self.states[self.state].do(self)
