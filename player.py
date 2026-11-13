@@ -68,7 +68,9 @@ class Player:
             Player.image = sheet.load('player.png', 4, 8, pixel=PIXEL)
         self.x, self.y = x, y
         self.r = 12              # 충돌 반지름
-        self.face = 1            # 1: 오른쪽을 봄, -1: 왼쪽을 봄
+        self.face = 1            # 옆모습일 때 1: 오른쪽, -1: 왼쪽
+        self.view = 'side'       # side: 옆모습, back: 뒷모습(위를 봄), front: 앞모습(아래를 봄)
+        self.fx, self.fy = 1.0, 0.0   # 바라보는 방향 (2주차에 공격·던지기 방향으로 씀)
         self.frame = 0.0
         self.held = set()        # 지금 누르고 있는 이동키
         self.mouse = (x + 100, y)     # 마우스 위치 (게임 화면 좌표)
@@ -102,10 +104,25 @@ class Player:
         my = int(any(k in held for k in game_settings.KEY_UP)) - int(any(k in held for k in game_settings.KEY_DOWN))
         return mx, my
 
+    def update_aim(self):
+        """걷는 중엔 걷는 방향, 서 있을 땐 마우스 쪽을 바라봄"""
+        mx, my = self.input_dir()
+        if mx or my:
+            ln = math.hypot(mx, my)
+            ax, ay = mx / ln, my / ln
+        else:
+            dx, dy = self.mouse[0] - self.x, self.mouse[1] - (self.y + 20)
+            d = math.hypot(dx, dy)
+            if d < 8:                              # 커서가 캐릭터 위에 있으면 그대로
+                return
+            ax, ay = dx / d, dy / d
+        self.fx, self.fy = ax, ay
+        if abs(ax) > 0.15:
+            self.face = 1 if ax > 0 else -1
+        self.view = 'back' if ay > 0.75 else ('front' if ay < -0.75 else 'side')
+
     def walk(self):
         mx, my = self.input_dir()
-        if mx:
-            self.face = mx
         ln = math.hypot(mx, my)                    # 대각선도 같은 속도로
         d = SPEED * game_framework.frame_time
         level.move(self, mx / ln * d, my / ln * d)
@@ -114,6 +131,7 @@ class Player:
         return self.y - self.r
 
     def update(self):
+        self.update_aim()
         self.states[self.state].do(self)
 
     def draw(self):
