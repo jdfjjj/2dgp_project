@@ -69,7 +69,8 @@ class Player:
 
     def __init__(self, x, y):
         if Player.image is None:
-            Player.image = sheet.load('player.png', 4, 8, pixel=PIXEL)
+            Player.image = sheet.load('player.png', 4, 8, pixel=PIXEL,
+                                      groups=((0, 1, 2, 3), (4, 5), (6, 7)))   # 옆, 뒤, 앞모습 묶음
         self.x, self.y = x, y
         self.r = 12              # 충돌 반지름
         self.face = 1            # 옆모습일 때 1: 오른쪽, -1: 왼쪽
