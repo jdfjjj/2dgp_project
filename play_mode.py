@@ -3,6 +3,7 @@ from pico2d import get_events, clear_canvas, update_canvas, SDL_QUIT, SDL_KEYDOW
 from game_settings import W, H
 import game_framework
 import game_world
+import darkness
 import level
 import server
 from player import Player
@@ -16,6 +17,7 @@ def init():
     game_world.add_object(level.LevelView(), game_world.LAYER_FLOOR)
     server.player = Player(*level.start)
     game_world.add_object(server.player, game_world.LAYER_CHAR)
+    game_world.add_object(darkness.Darkness(), game_world.LAYER_DARK)
 
 
 def finish():

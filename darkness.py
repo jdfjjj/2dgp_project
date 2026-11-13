@@ -29,3 +29,17 @@ def draw_darkness(lights):
                 box('dark', gx, gy, gx + CELL, gy + CELL, a)
         if run is not None:
             box('dark', run, gy, W, gy + CELL)
+
+
+class Darkness:
+    """맵 위를 덮는 어둠과 빛 (게임 월드의 어둠 레이어에 넣음)"""
+
+    def __init__(self):
+        self.clock = 0.0
+
+    def update(self):
+        self.clock += game_framework.frame_time
+
+    def draw(self):
+        p = server.player
+        draw_darkness([(p.x, p.y + 20, server.light_radius())])
