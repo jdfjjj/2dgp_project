@@ -43,6 +43,25 @@ def ch_at(x, y):
     return '#'
 
 
+SOLID = '#B'                             # 지나갈 수 없는 칸: 벽, 나무통
+
+
+def blocked(x, y, r):
+    """(x, y)가 중심이고 반지름 r인 몸이 벽이나 통에 닿는지 (몸의 네 모서리를 검사)"""
+    for px, py in ((x - r, y - r), (x + r, y - r), (x - r, y + r), (x + r, y + r)):
+        if ch_at(px, py) in SOLID:
+            return True
+    return False
+
+
+def move(o, dx, dy):
+    """가로, 세로를 따로 움직여서, 벽에 막혀도 벽을 따라 미끄러지듯 이동"""
+    if not blocked(o.x + dx, o.y, o.r):
+        o.x += dx
+    if not blocked(o.x, o.y + dy, o.r):
+        o.y += dy
+
+
 def build(rows=MAP):
     global grid, start
     grid = [list(row) for row in rows]
