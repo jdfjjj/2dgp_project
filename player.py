@@ -1,7 +1,7 @@
 import math
 
 from transitions import Machine
-from pico2d import SDL_KEYDOWN, SDL_KEYUP
+from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDL_MOUSEMOTION
 
 import game_settings
 import game_framework
@@ -71,6 +71,7 @@ class Player:
         self.face = 1            # 1: 오른쪽을 봄, -1: 왼쪽을 봄
         self.frame = 0.0
         self.held = set()        # 지금 누르고 있는 이동키
+        self.mouse = (x + 100, y)     # 마우스 위치 (게임 화면 좌표)
 
         # 13강 상태 머신: 언제 어떤 상태로 바뀌는지는 transitions가, 상태마다 할 일은 상태 클래스가
         self.states = {'IDLE': Idle(), 'RUN': Run()}
@@ -92,6 +93,8 @@ class Player:
             self.held.add(e.key)
         elif e.type == SDL_KEYUP:
             self.held.discard(e.key)
+        elif e.type == SDL_MOUSEMOTION:
+            self.mouse = (e.x, game_settings.H - 1 - e.y)
 
     def input_dir(self):
         held = self.held
