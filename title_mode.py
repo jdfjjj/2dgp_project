@@ -36,7 +36,7 @@ def init():
     global clock, sel, hero, foes, icons
     clock = 0.0
     sel = 0
-    hero = sheet.load('player.png', 4, 8, pixel=58)
+    hero = sheet.load('player.png', 4, 8, pixel=58, groups=((0, 1, 2, 3), (4, 5), (6, 7)))
     foes = sheet.load('enemies.png', 4, 5, per_row=True, pixel=35)
     icons = sheet.load('enemies.png', 4, 5, per_row=True, pixel=22)
 
@@ -123,12 +123,12 @@ def draw():
 
     hx, hy = 190, 160                                    # 주인공 + 손의 빛
     bob = math.sin(t * 1.5) * 1.5                        # 아주 천천히 숨쉬듯
-    lx, ly = hx + 22, hy + 32 + bob                      # 손의 빛 위치
+    lx, ly = hx + 34, hy + 28 + bob                      # 손의 빛 위치 (앞모습 기준)
     flick = 0.7 + 0.15 * math.sin(t * 11)                # 빛이 살짝 일렁임
     img_draw('glow_y', hx + 16, hy + 50, 210, 210, 0.2)  # 주인공을 감싸는 따뜻한 빛
     img_draw('shadow', hx, hy + 2, 66, 12, 0.9)
     if hero:
-        hero.draw(0, 0, hx, hy + bob, 116, alpha=0.82)   # 한 장으로 고정
+        hero.draw(0, 6, hx, hy + bob, 116, alpha=0.82)   # 앞모습, 한 장으로 고정
     img_draw('glow_y', lx, ly, 56, 56, flick)            # 손의 빛 (넓게 번짐)
     img_draw('glow_y', lx, ly, 22, 22, 0.9)              # 밝은 중심
     img_draw('glow_w', lx, ly, 10, 10, 0.85 + 0.1 * math.sin(t * 11))   # 하얀 심지

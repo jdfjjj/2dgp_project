@@ -8,7 +8,7 @@ from pico2d import load_image
 import game_settings
 import draw_util
 
-ASSET_VERSION = 'w1d'
+ASSET_VERSION = 'w1i'
 
 
 def gp(name):
@@ -249,17 +249,17 @@ def shadow_px(x, y):
     return (0, 0, 0, 120 * (1 - d)) if d < 1 else (0, 0, 0, 0)
 
 
-LIGHT_PAL = {'o': (110, 70, 15), 'W': (255, 245, 190), 'Y': (255, 205, 90), 'd': (200, 140, 40)}
-LIGHT_ICON = [
-    '....o....',
-    '...oWo...',
-    '..oWWYo..',
-    '.oWWYYYo.',
-    'oWYYYYYdo',
-    '.oYYYYdo.',
-    '..oYYdo..',
-    '...odo...',
-    '....o....',
+LIGHT_PAL = {'Y': (232, 188, 84), 'L': (250, 222, 130), 'W': (255, 248, 220)}
+LIGHT_ICON = [                           # 십자로 빛이 뻗는 반짝이 별 (9 × 9)
+    '....Y....',
+    '....L....',
+    '...YWY...',
+    '..YLWLY..',
+    'YLWWWWWLY',
+    '..YLWLY..',
+    '...YWY...',
+    '....L....',
+    '....Y....',
 ]
 
 
