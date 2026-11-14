@@ -37,7 +37,8 @@ def init():
     clock = 0.0
     sel = 0
     hero = sheet.load('player.png', 4, 8, pixel=58, groups=((0, 1, 2, 3), (4, 5), (6, 7)))
-    foes = sheet.load('enemies.png', 4, 5, per_row=True, pixel=35)
+    foes = sheet.load('enemies_front.png', 4, 5, per_row=True, pixel=52,
+                      groups=((3,), (0, 1, 2, 4)))   # 타이틀 전용 앞모습 (4번째 줄 큰 그림자)
     icons = sheet.load('enemies.png', 4, 5, per_row=True, pixel=22)
 
 
@@ -136,10 +137,10 @@ def draw():
     ex, ey = 770, 160                                    # 적 (어둠 쪽)
     img_draw('shadow', ex, ey + 2, 80, 12, 0.9)
     if foes:
-        foes.draw(int(t * 3) % 4, 3, ex, ey + math.sin(t * 3) * 3, 104, alpha=0.7)
+        foes.draw(0, 3, ex, ey + math.sin(t * 3) * 3, 104, alpha=0.55)
     eb = math.sin(t * 3) * 3
-    for dx in (29, 46):                                  # 눈빛
-        img_draw('glow_y', ex + dx, ey + 42 + eb, 24, 24, 0.45 + 0.2 * math.sin(t * 5))
+    for dx in (-15, 15):                                 # 눈빛
+        img_draw('glow_y', ex + dx, ey + 53 + eb, 24, 24, 0.45 + 0.2 * math.sin(t * 5))
 
     for i, label in enumerate(MENU):
         draw_button(label, W / 2, BTN_Y - i * BTN_GAP, i == sel)
