@@ -44,7 +44,8 @@ class Darkness:
         p = server.player
         t = self.clock
         rad = server.light_radius() * (1 + 0.02 * math.sin(t * 9))       # 빛이 살짝 일렁임
-        draw_darkness([(p.x, p.y + 20, rad)])
+        lights = [(p.x, p.y + 20, rad)] + [o.light() for o in server.orbs]  # 주인공 빛 + 던진 빛
+        draw_darkness(lights)
         p.draw_aim()                                                      # 공격 범위 부채꼴
         img_draw('glow_y', p.x, p.y + 20, rad * 2.2, rad * 2.2, 0.06)     # 빛이 닿는 곳의 따뜻한 기운
         hx, hy = p.hand()
