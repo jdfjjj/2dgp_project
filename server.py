@@ -96,10 +96,9 @@ def orb_hit(e):
 
 
 def pick_light(pk):
-    """빛 조각 줍기: 빛이 차고, 조각이 흩어지며 +7 이 떠오름"""
+    """빛 조각 줍기: 빛이 차고, 조각이 금빛으로 흩어짐"""
     if pk in pickups:
         pickups.remove(pk)
         game_world.remove_object(pk)
         add_light(game_settings.SHARD_LIGHT)
         effects.burst(pk.x, pk.y, 'px_gold', 10, 100)
-        effects.text(pk.x, pk.y + 24, '+%d' % game_settings.SHARD_LIGHT, 'y')
