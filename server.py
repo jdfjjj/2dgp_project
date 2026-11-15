@@ -78,6 +78,7 @@ def kill(e):
         effects.burst(e.x, e.y + 8, 'px_white', 6, 120)
         if e.carry > 0:
             drop_light(e.x, e.y, e.carry)
+        add_light(game_settings.KILL_LIGHT)
 
 
 def player_throw():
