@@ -7,6 +7,7 @@ import darkness
 import level
 import server
 from player import Player
+from enemy import Enemy
 from draw_util import box
 import title_mode
 
@@ -15,6 +16,10 @@ def init():
     game_world.clear()
     level.build()
     game_world.add_object(level.LevelView(), game_world.LAYER_FLOOR)
+    server.enemies = []
+    for x, y in level.spawns:
+        server.enemies.append(Enemy('blob', x, y))
+    game_world.add_objects(server.enemies, game_world.LAYER_CHAR)
     server.player = Player(*level.start)
     game_world.add_object(server.player, game_world.LAYER_CHAR)
     game_world.add_object(darkness.Darkness(), game_world.LAYER_DARK)

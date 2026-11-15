@@ -3,6 +3,7 @@
 import game_settings
 
 player = None
+enemies = []
 light_t = game_settings.START_LIGHT        # 지금 빛의 양 (2주차부터 시간이 지나면 줄어듦)
 ST = dict(game_settings.BASE_STATS)        # 주인공 능력치 (3주차에 강화 카드로 오름)
 
