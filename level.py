@@ -1,4 +1,5 @@
 import math
+import random
 
 import game_settings
 from game_settings import TILE, COLS, ROWS
@@ -47,6 +48,17 @@ def ch_at(x, y):
 
 
 SOLID = '#B'                             # 지나갈 수 없는 칸: 벽, 나무통
+
+
+def random_spots(n, avoid, min_d):
+    """바닥 칸 중에서 avoid 위치와 min_d 이상 떨어진 곳을 겹치지 않게 n개 고름"""
+    cells = []
+    for r in range(ROWS):
+        for c in range(COLS):
+            x, y = tile_center(c, r)
+            if grid[r][c] == '.' and math.hypot(x - avoid[0], y - avoid[1]) >= min_d:
+                cells.append((x, y))
+    return random.sample(cells, min(n, len(cells)))
 
 
 def can_see(x1, y1, x2, y2):
