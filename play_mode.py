@@ -26,8 +26,9 @@ def init():
     server.enemies = []
     server.orbs = []
     server.pickups = []
-    for x, y in level.spawns:
-        server.enemies.append(Enemy('blob', x, y))
+    kinds = ['blob', 'blob', 'thief', 'brute']           # 2주차 시험용 배치 (3주차부터 층마다 정함)
+    for i, (x, y) in enumerate(level.spawns):
+        server.enemies.append(Enemy(kinds[i % len(kinds)], x, y))
     game_world.add_objects(server.enemies, game_world.LAYER_CHAR)
     for x, y in level.random_spots(game_settings.SHARD_COUNT, level.start, 150):
         server.pickups.append(items.Pickup(x, y))
