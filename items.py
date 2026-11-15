@@ -1,4 +1,5 @@
 import math
+import random
 
 import game_framework
 import game_settings
@@ -63,3 +64,27 @@ class Orb:
         flick = 0.8 + 0.2 * math.sin(self.clock * 12)
         img_draw('glow_y', self.x, self.y, 48 * k, 48 * k, 0.8 * flick)
         img_draw('i_light', self.x, self.y, 18, 18, k)
+
+
+class Pickup:
+    """바닥에 놓인 빛 조각: 주인공이 닿으면 빛이 참.
+    어두운 곳에서도 희미하게 반짝여서 찾을 수 있음 (어둠 위의 이펙트 레이어에 넣음)"""
+
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+        self.r = 10
+        self.clock = random.random() * 6
+
+    def update(self):
+        self.clock += game_framework.frame_time
+        p = server.player
+        if math.hypot(p.x - self.x, p.y - self.y) < p.r + self.r:
+            server.pick_light(self)
+
+    def draw(self):
+        p = server.player
+        bob = math.sin(self.clock * 3) * 2
+        lit = math.hypot(p.x - self.x, p.y - self.y) < server.light_radius()
+        a = 1.0 if lit else 0.35 + 0.15 * math.sin(self.clock * 4)   # 어둠 속에서는 희미하게
+        img_draw('glow_y', self.x, self.y + bob, 36, 36, 0.5 * a)
+        img_draw('i_light', self.x, self.y + bob, 18, 18, a)
