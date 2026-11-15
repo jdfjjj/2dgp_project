@@ -1,4 +1,5 @@
 import server
+import game_settings
 from game_settings import W, H, HUD_Y
 from draw_util import img_draw, box
 
@@ -7,9 +8,18 @@ BAR_TICKS = 10                           # 게이지를 나누는 칸 수
 
 
 def draw():
-    """화면 위쪽 정보창과 빛 게이지 (하트는 다음에 추가)"""
+    """화면 위쪽 정보창: 하트, 그 아래 가운데에 빛 게이지"""
     box('px_lav', 0, HUD_Y, W, HUD_Y + 1, 0.25)                      # 정보창 아래 경계선
+    draw_hearts((HUD_Y + H) / 2)
     draw_light_bar(HUD_Y - 18)
+
+
+def draw_hearts(y):
+    """하트: 남은 하트는 빨갛게, 잃은 하트는 비어 있게 (도트 3배)"""
+    p = server.player
+    for i in range(game_settings.MAX_HEARTS):
+        name = 'i_heart' if i < p.hearts else 'i_heart_e'
+        img_draw(name, 32 + i * 36, y, 27, 24)
 
 
 def draw_light_bar(y):
