@@ -11,6 +11,10 @@ from draw_util import img_draw, say
 ENEMY_PX = {0: 16, 1: 16, 2: 20, 3: 30, 4: 44}   # 적 종류(줄)마다 도트 키. 화면에는 2배로 그림
 WANDER_TIME = (1.0, 2.5)                         # 한 방향으로 어슬렁거리는 시간 (초)
 MARK_TIME = 0.9                                  # 머리 위 !, ? 가 떠 있는 시간 (초)
+EYES = {                                         # 줄마다 눈 위치 (화면 키에 대한 비율)
+    0: (0.10, 0.12, 0.55), 1: (0.10, 0.12, 0.55), 2: (0.10, 0.12, 0.55),   # 앞쪽 치우침, 두 눈 간격의 절반, 발에서 높이
+    3: (0.10, 0.12, 0.60), 4: (0.10, 0.12, 0.60),
+}
 KNOCK_SPEED = 260                                # 맞았을 때 밀려나는 속도 (px/s)
 
 
@@ -144,8 +148,15 @@ class Enemy:
                          '' if self.face > 0 else 'h', alpha=a)
 
     def draw_mark(self):
-        """머리 위 !, ? (어둠 위에 그려서 어두운 곳에서도 보임)"""
+        """어둠 위에 그리는 표시: 쫓아올 때 빨간 눈빛, 머리 위 !, ? (어두운 곳에서도 보임)"""
+        h = ENEMY_PX[self.row] * 2
+        if self.state == 'chase' and self.stun_t <= 0:              # 쫓아올 때 빨간 눈빛
+            cx, gap, ey = EYES[self.row]
+            x = self.x + self.face * h * cx
+            y = self.feet() + h * ey
+            a = 0.5 + 0.2 * math.sin(self.frame * 3)
+            for s in (-1, 1):
+                img_draw('glow_r', x + s * h * gap, y, h * 0.5, h * 0.5, a)
         if self.mark_t > 0:
-            h = ENEMY_PX[self.row] * 2
             say(self.mark, self.x, self.feet() + h + 14, 22,
-                'y' if self.mark == '!' else 'g', 'center', 'pixel')
+                'r' if self.mark == '!' else 'g', 'center', 'pixel')
