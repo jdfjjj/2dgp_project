@@ -1,3 +1,5 @@
+import math
+
 import game_settings
 from game_settings import TILE, COLS, ROWS
 from draw_util import img_draw
@@ -45,6 +47,16 @@ def ch_at(x, y):
 
 
 SOLID = '#B'                             # 지나갈 수 없는 칸: 벽, 나무통
+
+
+def can_see(x1, y1, x2, y2):
+    """두 점 사이에 벽이 없으면 True (8px 간격으로 검사, 나무통은 시야를 가리지 않음)"""
+    n = max(1, int(math.hypot(x2 - x1, y2 - y1) / 8))
+    for i in range(1, n):
+        t = i / n
+        if ch_at(x1 + (x2 - x1) * t, y1 + (y2 - y1) * t) == '#':
+            return False
+    return True
 
 
 def blocked(x, y, r):
