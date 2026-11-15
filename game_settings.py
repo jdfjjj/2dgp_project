@@ -47,5 +47,14 @@ THEMES = [
 ]
 
 
+# ─────────── 적 ───────────
+ENEMY_DEF = {                    # row: enemies.png 줄, walk/chase: 배회/추격 속도(km/h), r: 충돌 반지름
+    'blob': dict(row=0, hp=1, walk=3.1, chase=5.3, r=10),
+}
+DETECT_BASE = 95                 # 적이 알아채는 기본 거리 (px). 여기에 내 빛 반경의 절반을 더함
+CLOSE_DETECT = 52                # 이 거리 안이면 벽과 상관없이 무조건 알아챔
+LOSE_TIME = 2.5                  # 놓친 뒤 이 시간이 지나면 포기 (초)
+
+
 def clampf(v, lo, hi):
     return max(lo, min(hi, v))
