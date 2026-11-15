@@ -8,7 +8,7 @@ from pico2d import load_image
 import game_settings
 import draw_util
 
-ASSET_VERSION = 'w2a2'
+ASSET_VERSION = 'w2a3'
 
 
 def gp(name):
@@ -307,6 +307,7 @@ def build_images():
     gen('glow_w', 128, 128, glow_fn((255, 250, 255)), True)
     gen('glow_l', 128, 128, glow_fn((190, 160, 255)), True)
     gen('glow_y', 128, 128, glow_fn((255, 210, 90)), True)
+    gen('glow_r', 128, 128, glow_fn((255, 50, 70)), True)
     gen('shadow', 32, 10, shadow_px, True)
     for deg in (110, 140, 170, 200, 230):        # 강화 단계별 공격 각도
         gen('fan%d' % deg, 128, 128, fan_fn(deg), True)
