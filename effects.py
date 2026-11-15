@@ -3,7 +3,7 @@ import random
 
 import game_framework
 import game_world
-from draw_util import img_draw, IMG
+from draw_util import img_draw, IMG, say
 
 
 class Particle:
@@ -56,6 +56,26 @@ class Slash:
         img_draw(self.name, self.x, self.y, s, s, 0.9 * k, self.ang)
 
 
+class FloatText:
+    """위로 떠오르다가 사라지는 글자 (빛 부족 같은 짧은 알림)"""
+    TIME = 0.8
+
+    def __init__(self, x, y, s, color, size):
+        self.x, self.y = x, y
+        self.s, self.color, self.size = s, color, size
+        self.t = FloatText.TIME
+
+    def update(self):
+        dt = game_framework.frame_time
+        self.t -= dt
+        self.y += 30 * dt
+        if self.t <= 0:
+            game_world.remove_object(self)
+
+    def draw(self):
+        say(self.s, self.x, self.y, self.size, self.color, 'center', 'pixel')
+
+
 def burst(x, y, img, n, speed=110):
     """조각 n개를 한꺼번에 흩뿌림"""
     game_world.add_objects([Particle(x, y, img, speed) for _ in range(n)], game_world.LAYER_FX)
@@ -63,3 +83,7 @@ def burst(x, y, img, n, speed=110):
 
 def slash(x, y, ang, reach, arc):
     game_world.add_object(Slash(x, y, ang, reach, arc), game_world.LAYER_FX)
+
+
+def text(x, y, s, color='w', size=22):
+    game_world.add_object(FloatText(x, y, s, color, size), game_world.LAYER_FX)
