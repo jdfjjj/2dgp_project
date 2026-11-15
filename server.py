@@ -56,17 +56,33 @@ def player_attack():
 
 
 def hit_enemy(e, dmg, nx, ny):
-    """적에게 피해. 큰 그림자는 갑옷이 벗겨졌을 때만 통함. 체력이 0이 되면 처치"""
+    """적에게 피해. 큰 그림자는 빛을 맞아 금빛일 때만 베이고, 다 베이면 기본 그림자로 변함"""
     if e.armor and e.expose_t <= 0:
-        effects.burst(e.x, e.y + 16, 'px_white', 6, 80)     # 갑옷에 막힘
+        effects.burst(e.x, e.y + 16, 'px_white', 6, 80)     # 튕겨 냄
         e.knock(nx, ny)
         return
     e.hp -= dmg
-    effects.burst(e.x, e.y + 8, 'px_lav', 8)
+    effects.burst(e.x, e.y + 8, 'px_gold' if e.armor else 'px_lav', 8)
     if e.hp <= 0:
-        kill(e)
+        if e.armor:
+            shrink(e)
+        else:
+            kill(e)
     else:
         e.knock(nx, ny)
+
+
+def shrink(e):
+    """세 번 베인 큰 그림자: 크게 터지면서 그 자리에 기본 그림자가 생겨 바로 쫓아옴 (처치로는 안 셈)"""
+    if e in enemies:
+        enemies.remove(e)
+        game_world.remove_object(e)
+        effects.burst(e.x, e.y + 16, 'px_lav', 20, 200)
+        effects.burst(e.x, e.y + 16, 'px_gold', 10, 140)
+        small = e.__class__('blob', e.x, e.y)       # 같은 Enemy 클래스로 기본 그림자를 만듦
+        small.alert()
+        enemies.append(small)
+        game_world.add_object(small, game_world.LAYER_CHAR)
 
 
 def kill(e):
