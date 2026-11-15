@@ -8,7 +8,7 @@ from pico2d import load_image
 import game_settings
 import draw_util
 
-ASSET_VERSION = 'w2b'
+ASSET_VERSION = 'w2c'
 
 
 def gp(name):
@@ -302,6 +302,16 @@ def fan_fn(deg):
     return px
 
 
+def warn_fn(x, y):
+    """내려찍기 경고 원: 안쪽은 옅은 빨강, 테두리는 진한 빨강"""
+    d = math.hypot(x - 63.5, y - 63.5) / 63.5
+    if d > 1.0:
+        return (0, 0, 0, 0)
+    if d > 0.92:
+        return (255, 80, 100, 230)
+    return (255, 60, 90, 70 + 60 * d)
+
+
 def build_images():
     os.makedirs(game_settings.GEN_DIR, exist_ok=True)
     ver = gp('version.txt')
@@ -325,6 +335,7 @@ def build_images():
     gen('shadow', 32, 10, shadow_px, True)
     for deg in (110, 140, 170, 200, 230):        # 강화 단계별 공격 각도
         gen('fan%d' % deg, 128, 128, fan_fn(deg), True)
+    gen('warn', 128, 128, warn_fn, True)
     sprite('i_light', LIGHT_ICON, LIGHT_PAL)
     sprite('i_heart', HEART_ICON, HEART_PAL)
     sprite('i_heart_e', HEART_ICON, HEART_EMPTY_PAL)
