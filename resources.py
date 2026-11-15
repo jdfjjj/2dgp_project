@@ -8,7 +8,7 @@ from pico2d import load_image
 import game_settings
 import draw_util
 
-ASSET_VERSION = 'w2a'
+ASSET_VERSION = 'w2a2'
 
 
 def gp(name):
@@ -271,7 +271,7 @@ SOLIDS = {
 
 
 def fan_fn(deg):
-    """공격 범위 부채꼴 (오른쪽을 향함). 안쪽은 은은하게, 테두리는 밝게"""
+    """공격 범위 부채꼴 (오른쪽을 향함). 빛으로 베는 공격이라 금빛: 안쪽은 은은하게, 테두리는 밝게"""
     half = math.radians(deg) / 2
 
     def px(x, y):
@@ -283,8 +283,8 @@ def fan_fn(deg):
         if a > half:
             return (0, 0, 0, 0)
         if d > 0.94 or (half - a) * 63.5 * d < 1.5:
-            return (230, 215, 255, 210)
-        return (190, 160, 255, 255 * (0.08 + 0.2 * d))
+            return (255, 236, 170, 210)
+        return (255, 210, 90, 255 * (0.08 + 0.2 * d))
     return px
 
 
