@@ -41,6 +41,9 @@ WALK_FRAMES_PER_STRIDE = 4       # 한 걸음 주기에 들어가는 애니메�
 # ─────────── 빛 / 시야 ───────────
 LIGHT_BASE = 46                  # 빛이 없을 때 시야 (px)
 START_LIGHT = 8.0                # 층 시작할 때 빛
+LIGHT_DECAY = 0.25               # 1초에 줄어드는 빛
+SHARD_LIGHT = 7                  # 빛 조각 하나로 채워지는 빛
+SHARD_COUNT = 6                  # 맵에 놓이는 빛 조각 수
 CELL = 16                        # 어둠 칸 크기 (버벅이면 24로)
 PLAYER_SCALE = 2
 BASE_STATS = dict(speed=kmph_to_pps(PLAYER_SPEED_KMPH), light_cap=20.0, sight=190.0,
