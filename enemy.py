@@ -36,12 +36,35 @@ class Enemy:
         self.last_seen = None                    # 마지막으로 주인공을 본 위치
         self.lost_t = 0.0
         self.mark, self.mark_t = '', 0.0
+        self.pick_wander()
 
     def feet(self):
         return self.y - self.r
 
+    def pick_wander(self):
+        if random.random() < 0.3:
+            self.dir = (0.0, 0.0)                # 잠깐 멈춰 있기
+        else:
+            a = random.uniform(0, math.tau)
+            self.dir = (math.cos(a), math.sin(a))
+        self.timer = random.uniform(*WANDER_TIME)
+
+    def wander(self, dt):
+        self.timer -= dt
+        if self.timer <= 0:
+            self.pick_wander()
+        self.step(self.dir[0] * self.walk_speed * dt, self.dir[1] * self.walk_speed * dt)
+
     def update(self):
-        self.frame = (self.frame + 6 * game_framework.frame_time) % 4
+        dt = game_framework.frame_time
+        self.frame = (self.frame + 6 * dt) % 4
+        self.wander(dt)
+
+    def step(self, dx, dy):
+        self.x += dx
+        self.y += dy
+        if abs(dx) > 0.01:
+            self.face = 1 if dx > 0 else -1
 
     def draw(self):
         h = ENEMY_PX[self.row] * 2
