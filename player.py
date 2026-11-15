@@ -199,3 +199,18 @@ class Player:
         row = ROWS[(self.view, kind)]
         flip = 'h' if self.view == 'side' and self.face < 0 else ''
         Player.image.draw(col, row, self.x, self.feet(), PLAYER_HEIGHT, flip)
+
+    def draw_aim(self):
+        """공격 범위 부채꼴 (어둠 위에 그림): 공격할 수 있으면 밝게, 대기 중이면 흐렸다가 차오름"""
+        st = server.ST
+        name = 'fan%d' % int(round(st['arc']))
+        if name not in IMG:
+            name = 'fan110'
+        ang = math.atan2(self.fy, self.fx)
+        size = st['reach'] * 2
+        if self.atk_cd <= 0:
+            img_draw(name, self.x, self.y, size, size, 0.45 + 0.1 * math.sin(self.clock * 6), ang)
+        else:
+            k = 1 - self.atk_cd / max(st['slash_cd'], 0.01)
+            img_draw(name, self.x, self.y, size, size, 0.15, ang)
+            img_draw(name, self.x, self.y, size * k, size * k, 0.3, ang)
