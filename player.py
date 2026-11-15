@@ -1,7 +1,7 @@
 import math
 
 from transitions import Machine
-from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDL_MOUSEMOTION
+from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDL_MOUSEMOTION, SDL_MOUSEBUTTONDOWN
 
 import game_settings
 import game_framework
@@ -128,17 +128,18 @@ class Player:
         return self.atk_cd <= 0
 
     def handle_event(self, e):
-        if e.type == SDL_KEYDOWN:
-            if e.key in game_settings.KEY_MOVE:
-                self.held.add(e.key)
-            elif e.key in game_settings.KEY_ATTACK:
-                self.update_aim()                  # 누른 순간 바라보는 방향으로 공격
-                self.attack()
+        if e.type == SDL_KEYDOWN and e.key in game_settings.KEY_MOVE:
+            self.held.add(e.key)
         elif e.type == SDL_KEYUP:
             self.held.discard(e.key)
         elif e.type == SDL_MOUSEMOTION:
             self.mouse = (e.x, game_settings.H - 1 - e.y)
             self.mouse_aim = True
+        elif e.type == SDL_MOUSEBUTTONDOWN and e.button == game_settings.MOUSE_LEFT:
+            self.mouse = (e.x, game_settings.H - 1 - e.y)
+            self.mouse_aim = True
+            self.update_aim()                      # 서 있으면 클릭한 쪽, 걷는 중이면 걷는 방향으로 공격
+            self.attack()
 
     def input_dir(self):
         held = self.held
