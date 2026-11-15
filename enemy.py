@@ -56,10 +56,13 @@ class Enemy:
         self.step(self.dir[0] * self.walk_speed * dt, self.dir[1] * self.walk_speed * dt)
 
     def step(self, dx, dy):
-        self.x += dx
-        self.y += dy
+        ox, oy = self.x, self.y
+        level.move(self, dx, dy)
         if abs(dx) > 0.01:
             self.face = 1 if dx > 0 else -1
+        moved = abs(self.x - ox) + abs(self.y - oy)
+        if self.state == 'wander' and (dx or dy) and moved < 0.01:
+            self.pick_wander()                   # 벽에 막히면 다른 방향으로
 
     def show_mark(self, mark):
         self.mark, self.mark_t = mark, MARK_TIME
