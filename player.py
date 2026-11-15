@@ -16,7 +16,7 @@ PLAYER_HEIGHT = PIXEL * 2        # 화면에 보일 키 = 도트 2배
 SPEED = game_settings.kmph_to_pps(game_settings.PLAYER_SPEED_KMPH)   # 16강: 10.7 km/h → 약 190 px/s
 IDLE_FPS = 3                     # 대기 동작: 1초에 넘기는 장 수
 ROWS = {                         # player.png 줄 번호: (바라보는 쪽, 동작)
-    ('side', 'idle'): 0, ('side', 'walk'): 1, ('side', 'attack'): 2,
+    ('side', 'idle'): 0, ('side', 'walk'): 1, ('side', 'attack'): 2, ('side', 'hurt'): 3,
     ('back', 'idle'): 4, ('back', 'walk'): 5, ('back', 'attack'): 4,
     ('front', 'idle'): 6, ('front', 'walk'): 7, ('front', 'attack'): 6,
 }
@@ -129,6 +129,10 @@ class Player:
         self.atk_cd = 0.0        # 다음 공격까지 남은 시간
         self.throw_cd = 0.0  # 다음 던지기까지 남은 시간
         self.pose_t = 0.0        # 공격 자세 남은 시간
+        self.hearts = game_settings.MAX_HEARTS
+        self.invuln = 0.0        # 무적 남은 시간
+        self.hurt_t = 0.0        # 피격 그림 남은 시간
+        self.kx = self.ky = 0.0  # 맞고 밀려나는 속도
         self.held = set()        # 지금 누르고 있는 이동키
 
         # 13강 상태 머신: 언제 어떤 상태로 바뀌는지는 transitions가, 상태마다 할 일은 상태 클래스가
@@ -161,6 +165,8 @@ class Player:
         return True
 
     def handle_event(self, e):
+        if self.hearts <= 0:                       # 쓰러지면 입력을 받지 않음
+            return
         if e.type == SDL_KEYDOWN and e.key in game_settings.KEY_MOVE:
             self.held.add(e.key)
         elif e.type == SDL_KEYUP:
@@ -226,12 +232,28 @@ class Player:
         self.clock += dt
         self.atk_cd = max(0.0, self.atk_cd - dt)
         self.throw_cd = max(0.0, self.throw_cd - dt)
+        self.invuln = max(0.0, self.invuln - dt)
+        self.hurt_t = max(0.0, self.hurt_t - dt)
+        if self.kx or self.ky:                     # 맞고 밀려나는 중
+            level.move(self, self.kx * dt, self.ky * dt)
+            decay = math.exp(-8 * dt)
+            self.kx *= decay
+            self.ky *= decay
+            if abs(self.kx) + abs(self.ky) < 5:
+                self.kx = self.ky = 0.0
+        if self.hearts <= 0:                       # 쓰러지면 움직이지 않음
+            return
         self.update_aim()
         self.states[self.state].do(self)
 
     def draw(self):
+        if self.invuln > 0 and self.hearts > 0 and int(self.invuln * 14) % 2 == 0:
+            return                                 # 무적 시간엔 깜빡임
         img_draw('shadow', self.x, self.feet() + 2, 34, 9, 0.9)
-        self.states[self.state].draw(self)
+        if self.hurt_t > 0 and self.view == 'side':
+            self.draw_frame('hurt', 0)             # 맞은 순간엔 피격 그림
+        else:
+            self.states[self.state].draw(self)
 
     def draw_frame(self, kind, col):
         row = ROWS[(self.view, kind)]
