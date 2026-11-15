@@ -70,7 +70,7 @@ THEMES = [
 ENEMY_DEF = {                    # row: enemies.png 줄, walk/chase: 배회/추격 속도(km/h), r: 충돌 반지름
     'blob': dict(row=0, hp=1, walk=3.1, chase=5.3, r=10),
     'thief': dict(row=2, hp=2, walk=3.1, chase=5.9, r=11),
-    'brute': dict(row=3, hp=5, walk=2.0, chase=3.5, r=14, armor=True),
+    'brute': dict(row=3, hp=3, walk=2.0, chase=3.5, r=14, armor=True),
 }
 DETECT_BASE = 95                 # 적이 알아채는 기본 거리 (px). 여기에 내 빛 반경의 절반을 더함
 CLOSE_DETECT = 52                # 이 거리 안이면 벽과 상관없이 무조건 알아챔
@@ -86,6 +86,7 @@ SLAM_WINDUP = 0.75               # 빨간 원을 보여 주는 시간 (초)
 SLAM_RECOVER = 0.9               # 내려찍은 뒤 멈춰 있는 시간 (초)
 SLAM_CD = 2.2                    # 다음 내려찍기까지 (초)
 SLAM_DMG = 2                     # 내려찍기 피해 (하트)
+BRUTE_SHRINK = 0.12              # 큰 그림자가 한 번 베일 때마다 작아지는 비율
 
 
 def clampf(v, lo, hi):
