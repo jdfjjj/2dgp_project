@@ -136,3 +136,11 @@ def check_contacts():
             continue
         if math.hypot(e.x - p.x, e.y - p.y) < e.r + p.r:
             hurt_player(e.x, e.y)
+
+
+def slam(e):
+    """큰 그림자의 내려찍기: 빨간 원 안에 있으면 하트 2개"""
+    effects.burst(e.x, e.y, 'px_red', 16, 180)
+    p = player
+    if math.hypot(p.x - e.x, p.y - e.y) < game_settings.SLAM_RADIUS:
+        hurt_player(e.x, e.y, game_settings.SLAM_DMG)

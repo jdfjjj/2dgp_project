@@ -53,5 +53,6 @@ class Darkness:
         hx, hy = p.hand()
         img_draw('glow_y', hx, hy, 40, 40, 0.7 + 0.15 * math.sin(t * 11))  # 손의 빛
         img_draw('glow_w', hx, hy, 8, 8, 0.9)
-        for e in server.enemies:                                          # 적 머리 위 !, ?
+        for e in server.enemies:                                          # 내려찍기 경고 원, 적 눈빛과 !, ?
+            e.draw_warn()
             e.draw_mark()

@@ -135,6 +135,26 @@ class Enemy:
             s = self.chase_speed * dt
             self.step(dx / d * s, dy / d * s)
 
+    def update_slam(self, dt, p):
+        """큰 그림자의 내려찍기: 가까우면 멈춰서 빨간 원을 보여 주고, 잠시 뒤 원 안을 내려찍음.
+        준비 중이거나 내려찍은 뒤 쉬는 중이면 True (다른 행동 안 함)"""
+        self.slam_cd = max(0.0, self.slam_cd - dt)
+        if self.slam_t > 0:
+            self.slam_t -= dt
+            if self.slam_t <= 0:
+                server.slam(self)
+                self.recover_t = game_settings.SLAM_RECOVER
+                self.slam_cd = game_settings.SLAM_CD
+            return True
+        if self.recover_t > 0:
+            self.recover_t -= dt
+            return True
+        if (self.state == 'chase' and self.slam_cd <= 0 and
+                math.hypot(p.x - self.x, p.y - self.y) < game_settings.SLAM_RANGE):
+            self.slam_t = game_settings.SLAM_WINDUP
+            return True
+        return False
+
     def update(self):
         dt = game_framework.frame_time
         self.clock += dt
@@ -150,8 +170,10 @@ class Enemy:
         if self.stun_t > 0:                      # 기절 중엔 움직이지 않음
             self.stun_t -= dt
             return
-        self.frame = (self.frame + 6 * dt) % 4
         p = server.player
+        if self.armor and self.update_slam(dt, p):
+            return
+        self.frame = (self.frame + 6 * dt) % 4
         if self.state == 'wander':
             self.wander(dt)
             if self.sees(p):
@@ -173,6 +195,13 @@ class Enemy:
             a = 0.55                                                         # 기절하면 흐려짐
         Enemy.image.draw(int(self.frame), self.row, self.x, self.feet(), h,
                          '' if self.face > 0 else 'h', alpha=a)
+
+    def draw_warn(self):
+        """내려찍기 범위 (빨간 원, 어둠 위에 그림): 내려찍을 때가 가까울수록 진해짐"""
+        if self.slam_t > 0:
+            k = 1 - self.slam_t / game_settings.SLAM_WINDUP
+            s = game_settings.SLAM_RADIUS * 2
+            img_draw('warn', self.x, self.y, s, s, 0.3 + 0.5 * k)
 
     def draw_mark(self):
         """어둠 위에 그리는 표시: 쫓아올 때 빨간 눈빛, 머리 위 !, ? (어두운 곳에서도 보임)"""
