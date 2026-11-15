@@ -29,6 +29,7 @@ class Enemy:
         self.kind = kind
         self.row = d['row']
         self.hp = d['hp']
+        self.max_hp = d['hp']
         self.armor = d.get('armor', False)       # 큰 그림자: 빛을 맞아야 공격이 통함
         self.walk_speed = game_settings.kmph_to_pps(d['walk'])
         self.chase_speed = game_settings.kmph_to_pps(d['chase'])
@@ -55,6 +56,12 @@ class Enemy:
 
     def feet(self):
         return self.y - self.r
+
+    def scale(self):
+        """큰 그림자는 벨 때마다 조금씩 작아짐 (나머지 적은 그대로)"""
+        if not self.armor:
+            return 1.0
+        return 1.0 - game_settings.BRUTE_SHRINK * (self.max_hp - self.hp)
 
     # ── 어슬렁거리기 ──
     def pick_wander(self):
@@ -202,18 +209,21 @@ class Enemy:
 
     # ── 그리기 ──
     def draw(self):
-        h = ENEMY_PX[self.row] * 2
+        s = self.scale()
+        h = ENEMY_PX[self.row] * 2 * s
         cy = self.feet() + h * 0.5
         img_draw('shadow', self.x, self.feet() + 2, h * 0.9, h * 0.25, 0.8)
         if self.carry > 0:                       # 훔친 빛을 들고 있으면 빛남
             img_draw('glow_y', self.x, cy, h * 2, h * 2, 0.35 + 0.1 * math.sin(self.clock * 6))
-        if self.expose_t > 0:                    # 갑옷이 벗겨지면 금빛이 감돔
+        if self.expose_t > 0:                    # 빛을 맞아 벨 수 있는 동안 금빛이 감돔
             img_draw('glow_y', self.x, cy, h * 1.8, h * 1.8, 0.3 + 0.15 * math.sin(self.clock * 8))
         a = 0.35 if self.hit_t > 0 and int(self.hit_t * 30) % 2 == 0 else 1.0   # 맞으면 깜빡임
         if self.stun_t > 0:
             a = 0.55                                                         # 기절하면 흐려짐
-        Enemy.image.draw(int(self.frame), self.row, self.x, self.feet(), h,
-                         '' if self.face > 0 else 'h', alpha=a)
+        Enemy.image.draw(int(self.frame), self.row, self.x, self.feet(), ENEMY_PX[self.row] * 2,
+                         '' if self.face > 0 else 'h', sx=s, sy=s, alpha=a)
+        if self.armor and self.hit_t > 0:        # 베이거나 튕겨 낼 때 하얗게 번쩍
+            img_draw('glow_w', self.x, cy, h * 1.3, h * 1.3, 0.5)
 
     def draw_warn(self):
         """내려찍기 범위 (빨간 원, 어둠 위에 그림): 내려찍을 때가 가까울수록 진해짐"""
@@ -224,7 +234,7 @@ class Enemy:
 
     def draw_mark(self):
         """어둠 위에 그리는 표시: 쫓아올 때 빨간 눈빛, 머리 위 !, ? (어두운 곳에서도 보임)"""
-        h = ENEMY_PX[self.row] * 2
+        h = ENEMY_PX[self.row] * 2 * self.scale()
         if self.state == 'chase' and self.stun_t <= 0:              # 쫓아올 때 빨간 눈빛
             cx, gap, ey = EYES[self.row]
             x = self.x + self.face * h * cx
@@ -232,6 +242,6 @@ class Enemy:
             a = 0.5 + 0.2 * math.sin(self.frame * 3)
             for s in (-1, 1):
                 img_draw('glow_r', x + s * h * gap, y, h * 0.5, h * 0.5, a)
-        if self.mark_t > 0:
-            say(self.mark, self.x, self.feet() + h + 14, 22,
+        if self.mark_t > 0:                                         # 게이지가 있으면 그 위에
+            say(self.mark, self.x, self.feet() + h + (26 if self.armor else 14), 22,
                 'r' if self.mark == '!' else 'g', 'center', 'pixel')
