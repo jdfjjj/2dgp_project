@@ -28,7 +28,7 @@ def init():
     game_world.add_objects(server.enemies, game_world.LAYER_CHAR)
     for x, y in level.random_spots(game_settings.SHARD_COUNT, level.start, 150):
         server.pickups.append(items.Pickup(x, y))
-    game_world.add_objects(server.pickups, game_world.LAYER_FX)
+    game_world.add_objects(server.pickups, game_world.LAYER_ITEM)
     server.player = Player(*level.start)
     game_world.add_object(server.player, game_world.LAYER_CHAR)
     game_world.add_object(darkness.Darkness(), game_world.LAYER_DARK)
