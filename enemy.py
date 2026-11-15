@@ -55,19 +55,63 @@ class Enemy:
             self.pick_wander()
         self.step(self.dir[0] * self.walk_speed * dt, self.dir[1] * self.walk_speed * dt)
 
-    def update(self):
-        dt = game_framework.frame_time
-        self.frame = (self.frame + 6 * dt) % 4
-        self.wander(dt)
-
     def step(self, dx, dy):
         self.x += dx
         self.y += dy
         if abs(dx) > 0.01:
             self.face = 1 if dx > 0 else -1
 
+    def show_mark(self, mark):
+        self.mark, self.mark_t = mark, MARK_TIME
+
+    def sees(self, p):
+        d = math.hypot(p.x - self.x, p.y - self.y)
+        if d < game_settings.CLOSE_DETECT:
+            return True
+        reach = game_settings.DETECT_BASE + server.light_radius() * 0.5   # 빛이 밝을수록 멀리서 알아챔
+        return d < reach and level.can_see(self.x, self.y, p.x, p.y)
+
+    def chase(self, dt, p):
+        if self.sees(p):
+            self.last_seen = (p.x, p.y)
+            self.lost_t = 0.0
+        else:
+            self.lost_t += dt
+        tx, ty = self.last_seen
+        dx, dy = tx - self.x, ty - self.y
+        d = math.hypot(dx, dy)
+        if self.lost_t > game_settings.LOSE_TIME or (self.lost_t > 0 and d < 6):
+            self.state = 'wander'                # 놓쳤으면 포기
+            self.show_mark('?')
+            self.pick_wander()
+            return
+        if d > 1:
+            s = self.chase_speed * dt
+            self.step(dx / d * s, dy / d * s)
+
+    def update(self):
+        dt = game_framework.frame_time
+        self.frame = (self.frame + 6 * dt) % 4
+        self.mark_t = max(0.0, self.mark_t - dt)
+        p = server.player
+        if self.state == 'wander':
+            self.wander(dt)
+            if self.sees(p):
+                self.state = 'chase'
+                self.last_seen, self.lost_t = (p.x, p.y), 0.0
+                self.show_mark('!')
+        else:
+            self.chase(dt, p)
+
     def draw(self):
         h = ENEMY_PX[self.row] * 2
         img_draw('shadow', self.x, self.feet() + 2, h * 0.9, h * 0.25, 0.8)
         Enemy.image.draw(int(self.frame), self.row, self.x, self.feet(), h,
                          '' if self.face > 0 else 'h')
+
+    def draw_mark(self):
+        """머리 위 !, ? (어둠 위에 그려서 어두운 곳에서도 보임)"""
+        if self.mark_t > 0:
+            h = ENEMY_PX[self.row] * 2
+            say(self.mark, self.x, self.feet() + h + 14, 22,
+                'y' if self.mark == '!' else 'g', 'center', 'pixel')
