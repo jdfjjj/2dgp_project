@@ -13,6 +13,7 @@ from player import Player
 from enemy import Enemy
 from draw_util import box
 import title_mode
+import gameover_mode
 
 
 def init():
@@ -65,6 +66,10 @@ def update():
     server.check_contacts()
     if server.player.hearts > 0:
         server.play_time += dt
+    if server.dead_t > 0:                      # 쓰러지고 잠깐 뒤 게임 오버
+        server.dead_t -= dt
+        if server.dead_t <= 0:
+            game_framework.change_mode(gameover_mode)
 
 
 def draw():
