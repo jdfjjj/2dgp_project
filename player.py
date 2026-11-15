@@ -6,6 +6,7 @@ from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDL_MOUSEMOTION, SDL_MOUSEBUTTONDOWN
 import game_settings
 import game_framework
 import level
+import effects
 import server
 import sheet
 from draw_util import img_draw, IMG
@@ -87,6 +88,28 @@ class Attack:
         p.draw_frame('attack', 0)
 
 
+class Throw:
+    """빛 던지기: 잠깐 던지는 자세를 보여 주고 IDLE로 (던지면서도 움직일 수 있음)"""
+
+    def enter(self, p):
+        p.pose_t = game_settings.THROW_TIME
+        p.throw_cd = server.ST['throw_cd']
+        server.player_throw()
+
+    def exit(self, p):
+        pass
+
+    def do(self, p):
+        p.pose_t -= game_framework.frame_time
+        if p.input_dir() != (0, 0):
+            p.walk()
+        if p.pose_t <= 0:
+            p.time_out()
+
+    def draw(self, p):
+        p.draw_frame('attack', 0)
+
+
 class Player:
     image = None                 # 12강: 그림은 클래스 변수로 한 번만 불러와서 같이 씀
 
@@ -104,18 +127,20 @@ class Player:
         self.frame = 0.0
         self.clock = 0.0
         self.atk_cd = 0.0        # 다음 공격까지 남은 시간
+        self.throw_cd = 0.0  # 다음 던지기까지 남은 시간
         self.pose_t = 0.0        # 공격 자세 남은 시간
         self.held = set()        # 지금 누르고 있는 이동키
 
         # 13강 상태 머신: 언제 어떤 상태로 바뀌는지는 transitions가, 상태마다 할 일은 상태 클래스가
-        self.states = {'IDLE': Idle(), 'RUN': Run(), 'ATTACK': Attack()}
+        self.states = {'IDLE': Idle(), 'RUN': Run(), 'ATTACK': Attack(), 'THROW': Throw()}
         self.machine = Machine(model=self, states=list(self.states), initial='IDLE',
                                auto_transitions=False, ignore_invalid_triggers=True,
                                before_state_change='_exit_state', after_state_change='_enter_state')
         self.machine.add_transition('move_start', 'IDLE', 'RUN')
         self.machine.add_transition('move_stop', 'RUN', 'IDLE')
         self.machine.add_transition('attack', ['IDLE', 'RUN'], 'ATTACK', conditions='can_attack')
-        self.machine.add_transition('time_out', 'ATTACK', 'IDLE')
+        self.machine.add_transition('throw', ['IDLE', 'RUN'], 'THROW', conditions='can_throw')
+        self.machine.add_transition('time_out', ['ATTACK', 'THROW'], 'IDLE')
         self.states[self.state].enter(self)
 
     def _exit_state(self):
@@ -126,6 +151,14 @@ class Player:
 
     def can_attack(self):
         return self.atk_cd <= 0
+
+    def can_throw(self):
+        if self.throw_cd > 0:
+            return False
+        if server.light_t < server.ST['throw_cost']:
+            effects.text(self.x, self.y + 60, '빛 부족', 'g')
+            return False
+        return True
 
     def handle_event(self, e):
         if e.type == SDL_KEYDOWN and e.key in game_settings.KEY_MOVE:
@@ -140,6 +173,9 @@ class Player:
             self.mouse_aim = True
             self.update_aim()                      # 서 있으면 클릭한 쪽, 걷는 중이면 걷는 방향으로 공격
             self.attack()
+        elif e.type == SDL_KEYDOWN and e.key in game_settings.KEY_THROW:
+            self.update_aim()                      # 누른 순간 바라보는 방향으로 던짐
+            self.throw()
 
     def input_dir(self):
         held = self.held
@@ -189,6 +225,7 @@ class Player:
         dt = game_framework.frame_time
         self.clock += dt
         self.atk_cd = max(0.0, self.atk_cd - dt)
+        self.throw_cd = max(0.0, self.throw_cd - dt)
         self.update_aim()
         self.states[self.state].do(self)
 
