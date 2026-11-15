@@ -11,6 +11,7 @@ from draw_util import img_draw, say
 ENEMY_PX = {0: 16, 1: 16, 2: 20, 3: 30, 4: 44}   # 적 종류(줄)마다 도트 키. 화면에는 2배로 그림
 WANDER_TIME = (1.0, 2.5)                         # 한 방향으로 어슬렁거리는 시간 (초)
 MARK_TIME = 0.9                                  # 머리 위 !, ? 가 떠 있는 시간 (초)
+KNOCK_SPEED = 260                                # 맞았을 때 밀려나는 속도 (px/s)
 
 
 class Enemy:
@@ -36,6 +37,8 @@ class Enemy:
         self.last_seen = None                    # 마지막으로 주인공을 본 위치
         self.lost_t = 0.0
         self.mark, self.mark_t = '', 0.0
+        self.kx = self.ky = 0.0                  # 밀려나는 속도
+        self.hit_t = 0.0                         # 맞고 밀려나는 남은 시간
         self.pick_wander()
 
     def feet(self):
@@ -63,6 +66,16 @@ class Enemy:
         moved = abs(self.x - ox) + abs(self.y - oy)
         if self.state == 'wander' and (dx or dy) and moved < 0.01:
             self.pick_wander()                   # 벽에 막히면 다른 방향으로
+
+    def knock(self, nx, ny):
+        """공격에 맞음: 맞은 방향 반대로 밀려나고, 어슬렁거리던 중이면 바로 쫓아옴"""
+        self.kx, self.ky = nx * KNOCK_SPEED, ny * KNOCK_SPEED
+        self.hit_t = 0.25
+        if self.state == 'wander':
+            p = server.player
+            self.state = 'chase'
+            self.last_seen, self.lost_t = (p.x, p.y), 0.0
+            self.show_mark('!')
 
     def show_mark(self, mark):
         self.mark, self.mark_t = mark, MARK_TIME
@@ -96,6 +109,13 @@ class Enemy:
         dt = game_framework.frame_time
         self.frame = (self.frame + 6 * dt) % 4
         self.mark_t = max(0.0, self.mark_t - dt)
+        if self.hit_t > 0:                       # 맞고 밀려나는 중엔 다른 행동 안 함
+            self.hit_t -= dt
+            level.move(self, self.kx * dt, self.ky * dt)
+            decay = math.exp(-8 * dt)
+            self.kx *= decay
+            self.ky *= decay
+            return
         p = server.player
         if self.state == 'wander':
             self.wander(dt)
@@ -109,8 +129,9 @@ class Enemy:
     def draw(self):
         h = ENEMY_PX[self.row] * 2
         img_draw('shadow', self.x, self.feet() + 2, h * 0.9, h * 0.25, 0.8)
+        a = 0.35 if self.hit_t > 0 and int(self.hit_t * 30) % 2 == 0 else 1.0   # 맞으면 깜빡임
         Enemy.image.draw(int(self.frame), self.row, self.x, self.feet(), h,
-                         '' if self.face > 0 else 'h')
+                         '' if self.face > 0 else 'h', alpha=a)
 
     def draw_mark(self):
         """머리 위 !, ? (어둠 위에 그려서 어두운 곳에서도 보임)"""
