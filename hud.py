@@ -1,8 +1,6 @@
-import math
-
 import server
 from game_settings import H, HUD_Y
-from draw_util import img_draw, box, say
+from draw_util import img_draw, box
 
 BAR_X, BAR_W, BAR_H = 150, 240, 12       # 빛 게이지 위치와 크기
 
@@ -23,4 +21,3 @@ def draw_light_bar(y):
     box('bar_gold', BAR_X, y - BAR_H / 2, BAR_X + BAR_W * k, y + BAR_H / 2)
     tick = BAR_X + BAR_W * (4 / cap)                 # 이 아래로 내려가면 시야가 좁아지기 시작
     box('px_white', tick - 1, y - BAR_H / 2, tick + 1, y + BAR_H / 2, 0.5)
-    say('%d' % math.ceil(server.light_t), BAR_X + BAR_W + 14, y, 18, 'y', 'left', 'pixel')
