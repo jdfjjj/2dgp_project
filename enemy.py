@@ -259,9 +259,14 @@ class Enemy:
         s = self.scale()
         h = ENEMY_PX[self.row] * 2 * s
         if self.state == 'chase' and self.stun_t <= 0:              # 쫓아올 때 그림의 눈이 어둠 속에서 빛남
-            Enemy.image.draw(int(self.frame), self.row, self.x, self.feet(), ENEMY_PX[self.row] * 2,
-                             '' if self.face > 0 else 'h', sx=s, sy=s,
-                             alpha=0.75 + 0.25 * math.sin(self.clock * 8), eyes=True)
+            base = ENEMY_PX[self.row] * 2
+            flip = '' if self.face > 0 else 'h'
+            glow = 0.35 + 0.15 * math.sin(self.clock * 8)
+            for ox, oy in ((-2, 0), (2, 0), (0, -2), (0, 2)):        # 둘레에 흐리게 한 겹 더: 번지는 느낌
+                Enemy.image.draw(int(self.frame), self.row, self.x + ox, self.feet() + oy, base,
+                                 flip, sx=s, sy=s, alpha=glow, eyes=True)
+            Enemy.image.draw(int(self.frame), self.row, self.x, self.feet(), base,
+                             flip, sx=s, sy=s, eyes=True)
         if self.mark_t > 0:                                         # 게이지가 있으면 그 위에
             say(self.mark, self.x, self.feet() + h + (26 if self.armor else 14), 22,
                 'r' if self.mark == '!' else 'g', 'center', 'pixel')
