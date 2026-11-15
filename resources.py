@@ -8,7 +8,7 @@ from pico2d import load_image
 import game_settings
 import draw_util
 
-ASSET_VERSION = 'w1i'
+ASSET_VERSION = 'w2a'
 
 
 def gp(name):
@@ -270,6 +270,24 @@ SOLIDS = {
 }
 
 
+def fan_fn(deg):
+    """공격 범위 부채꼴 (오른쪽을 향함). 안쪽은 은은하게, 테두리는 밝게"""
+    half = math.radians(deg) / 2
+
+    def px(x, y):
+        dx, dy = x - 63.5, 63.5 - y
+        d = math.hypot(dx, dy) / 63.5
+        if d > 1.0 or d < 0.12:
+            return (0, 0, 0, 0)
+        a = abs(math.atan2(dy, dx))
+        if a > half:
+            return (0, 0, 0, 0)
+        if d > 0.94 or (half - a) * 63.5 * d < 1.5:
+            return (230, 215, 255, 210)
+        return (190, 160, 255, 255 * (0.08 + 0.2 * d))
+    return px
+
+
 def build_images():
     os.makedirs(game_settings.GEN_DIR, exist_ok=True)
     ver = gp('version.txt')
@@ -290,6 +308,8 @@ def build_images():
     gen('glow_l', 128, 128, glow_fn((190, 160, 255)), True)
     gen('glow_y', 128, 128, glow_fn((255, 210, 90)), True)
     gen('shadow', 32, 10, shadow_px, True)
+    for deg in (110, 140, 170, 200, 230):        # 강화 단계별 공격 각도
+        gen('fan%d' % deg, 128, 128, fan_fn(deg), True)
     sprite('i_light', LIGHT_ICON, LIGHT_PAL)
     for name, col in SOLIDS.items():
         gen(name, 1, 1, lambda x, y, col=col: col)
