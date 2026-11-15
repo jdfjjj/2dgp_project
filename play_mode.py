@@ -5,6 +5,7 @@ from game_settings import W, H
 import game_framework
 import game_world
 import darkness
+import hud
 import level
 import server
 from player import Player
@@ -59,4 +60,5 @@ def draw():
     clear_canvas()
     box('dark', 0, 0, W, H)
     game_world.render()
+    hud.draw()
     update_canvas()
