@@ -10,6 +10,7 @@ IMG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'images')
 ALPHA_CUT = bytes(0 if a <= 40 else 1 for a in range(256))     # 거의 투명한 점은 무시
 ON = b'\x01'
 PIXEL_VER = 3                    # 도트 변환 방식이 바뀌면 숫자를 올려서 그림을 다시 만듦
+EYE_MIN = 150                    # 이 밝기 이상인 점만 눈으로 봄 (몸까지 빛나면 올리고, 눈이 안 보이면 내림)
 
 
 def _set_smooth(on):
@@ -201,6 +202,26 @@ def _pixel_version(src, cols, rows, pixel, groups=None, heights=None):
             out[d:d + nw * 4] = img[y * nw * 4:(y + 1) * nw * 4]
     os.makedirs(game_settings.GEN_DIR, exist_ok=True)
     resources.write_png(dst, ow, oh, lambda x, y: out[(y * ow + x) * 4:(y * ow + x) * 4 + 4])
+    return dst
+
+
+def _eyes_version(src):
+    """그림에서 밝은 점(눈)만 남긴 그림을 escape_assets에 저장 (처음 한 번만).
+    몸 그림과 크기·칸 배치가 같아서, 같은 칸을 잘라 그리면 눈만 정확히 겹쳐짐"""
+    stem = os.path.splitext(os.path.basename(src))[0]
+    dst = os.path.join(game_settings.GEN_DIR, '%s_eyes%d.png' % (stem, EYE_MIN))
+    if os.path.exists(dst) and os.path.getmtime(dst) >= os.path.getmtime(src):
+        return dst
+    got = _surface_bytes(src)
+    if not got:
+        return None
+    w, h, px = got
+    out = bytearray(len(px))
+    for i in range(0, len(px), 4):
+        if px[i + 3] > 40 and max(px[i], px[i + 1], px[i + 2]) >= EYE_MIN:
+            out[i:i + 4] = px[i:i + 4]
+    os.makedirs(game_settings.GEN_DIR, exist_ok=True)
+    resources.write_png(dst, w, h, lambda x, y: out[(y * w + x) * 4:(y * w + x) * 4 + 4])
     return dst
 
 
