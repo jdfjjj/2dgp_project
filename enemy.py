@@ -6,7 +6,7 @@ import game_settings
 import level
 import server
 import sheet
-from draw_util import img_draw, say
+from draw_util import img_draw, say, box
 
 ENEMY_PX = {0: 16, 1: 16, 2: 20, 3: 30, 4: 44}   # 적 종류(줄)마다 도트 키. 화면에는 2배로 그림
 WANDER_TIME = (1.0, 2.5)                         # 한 방향으로 어슬렁거리는 시간 (초)
@@ -224,6 +224,25 @@ class Enemy:
                          '' if self.face > 0 else 'h', sx=s, sy=s, alpha=a)
         if self.armor and self.hit_t > 0:        # 베이거나 튕겨 낼 때 하얗게 번쩍
             img_draw('glow_w', self.x, cy, h * 1.3, h * 1.3, 0.5)
+        if self.armor:                           # 머리 위 게이지 (빛이 닿는 곳에서만 보임)
+            self.draw_gauge(h)
+
+    def draw_gauge(self, h):
+        """큰 그림자 머리 위 게이지: 칸 수 = 남은 벨 횟수.
+        평소엔 보라(벨 수 없음), 빛을 맞으면 금색(벨 수 있음)이 되고 위의 가는 줄이 남은 시간"""
+        n, w, gap = self.max_hp, 10, 2               # 칸 수, 한 칸 너비, 칸 사이
+        total = n * w + (n - 1) * gap
+        x0 = self.x - total / 2
+        y = self.feet() + h + 8
+        gold = self.expose_t > 0
+        for i in range(n):
+            x1 = x0 + i * (w + gap)
+            box('panel', x1 - 1, y - 3, x1 + w + 1, y + 3)
+            if i < self.hp:
+                box('px_gold' if gold else 'px_lav', x1, y - 2, x1 + w, y + 2)
+        if gold:
+            k = self.expose_t / game_settings.EXPOSE_TIME
+            box('px_gold', x0, y + 5, x0 + total * k, y + 6, 0.8)
 
     def draw_warn(self):
         """내려찍기 범위 (빨간 원, 어둠 위에 그림): 내려찍을 때가 가까울수록 진해짐"""
