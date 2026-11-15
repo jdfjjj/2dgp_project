@@ -11,11 +11,11 @@ from draw_util import img_draw, say
 ENEMY_PX = {0: 16, 1: 16, 2: 20, 3: 30, 4: 44}   # 적 종류(줄)마다 도트 키. 화면에는 2배로 그림
 WANDER_TIME = (1.0, 2.5)                         # 한 방향으로 어슬렁거리는 시간 (초)
 MARK_TIME = 0.9                                  # 머리 위 !, ? 가 떠 있는 시간 (초)
+KNOCK_SPEED = 260                                # 맞았을 때 밀려나는 속도 (px/s)
 EYES = {                                         # 줄마다 눈 위치 (화면 키에 대한 비율)
     0: (0.10, 0.12, 0.55), 1: (0.10, 0.12, 0.55), 2: (0.10, 0.12, 0.55),   # 앞쪽 치우침, 두 눈 간격의 절반, 발에서 높이
     3: (0.10, 0.12, 0.60), 4: (0.10, 0.12, 0.60),
 }
-KNOCK_SPEED = 260                                # 맞았을 때 밀려나는 속도 (px/s)
 
 
 class Enemy:
@@ -29,13 +29,15 @@ class Enemy:
         self.kind = kind
         self.row = d['row']
         self.hp = d['hp']
+        self.armor = d.get('armor', False)       # 큰 그림자: 빛을 맞아야 공격이 통함
         self.walk_speed = game_settings.kmph_to_pps(d['walk'])
         self.chase_speed = game_settings.kmph_to_pps(d['chase'])
         self.x, self.y = x, y
         self.r = d['r']                          # 충돌 반지름
         self.face = 1
         self.frame = random.random() * 4         # 적마다 움직임이 어긋나 보이게
-        self.state = 'wander'                    # wander: 어슬렁거림, chase: 쫓아옴
+        self.clock = 0.0
+        self.state = 'wander'                    # wander: 어슬렁, chase: 쫓아옴, flee: 빛을 들고 달아남
         self.dir = (0.0, 0.0)
         self.timer = 0.0
         self.last_seen = None                    # 마지막으로 주인공을 본 위치
@@ -44,11 +46,17 @@ class Enemy:
         self.kx = self.ky = 0.0                  # 밀려나는 속도
         self.hit_t = 0.0                         # 맞고 밀려나는 남은 시간
         self.stun_t = 0.0                        # 기절 남은 시간
+        self.expose_t = 0.0                      # 갑옷이 벗겨진 남은 시간
+        self.carry = 0.0                         # 빛 도둑이 훔쳐서 들고 있는 빛
+        self.slam_t = 0.0                        # 내려찍기 준비 남은 시간
+        self.recover_t = 0.0                     # 내려찍은 뒤 멈춰 있는 남은 시간
+        self.slam_cd = 0.0                       # 다음 내려찍기까지 남은 시간
         self.pick_wander()
 
     def feet(self):
         return self.y - self.r
 
+    # ── 어슬렁거리기 ──
     def pick_wander(self):
         if random.random() < 0.3:
             self.dir = (0.0, 0.0)                # 잠깐 멈춰 있기
@@ -72,20 +80,33 @@ class Enemy:
         if self.state == 'wander' and (dx or dy) and moved < 0.01:
             self.pick_wander()                   # 벽에 막히면 다른 방향으로
 
-    def knock(self, nx, ny):
-        """공격에 맞음: 맞은 방향 반대로 밀려나고, 어슬렁거리던 중이면 바로 쫓아옴"""
-        self.kx, self.ky = nx * KNOCK_SPEED, ny * KNOCK_SPEED
-        self.hit_t = 0.25
+    # ── 맞았을 때 ──
+    def alert(self):
+        """어슬렁거리던 중이면 주인공을 쫓기 시작"""
         if self.state == 'wander':
             p = server.player
             self.state = 'chase'
             self.last_seen, self.lost_t = (p.x, p.y), 0.0
             self.show_mark('!')
 
-    def stun(self, t):
-        """빛 구슬에 맞아 기절: 그 자리에 멈춤"""
-        self.stun_t = t
+    def knock(self, nx, ny):
+        """공격에 맞음: 맞은 방향 반대로 밀려남 (큰 그림자는 밀려나지 않고 깜빡이기만)"""
+        if self.armor:
+            self.hit_t = 0.15
+        else:
+            self.kx, self.ky = nx * KNOCK_SPEED, ny * KNOCK_SPEED
+            self.hit_t = 0.25
+        self.alert()
 
+    def stun(self, t):
+        """빛 구슬에 맞음: 큰 그림자는 갑옷이 벗겨지고, 나머지는 잠깐 기절"""
+        if self.armor:
+            self.expose_t = game_settings.EXPOSE_TIME
+        else:
+            self.stun_t = t
+        self.alert()
+
+    # ── 발견하고 쫓아오기 ──
     def show_mark(self, mark):
         self.mark, self.mark_t = mark, MARK_TIME
 
@@ -116,7 +137,9 @@ class Enemy:
 
     def update(self):
         dt = game_framework.frame_time
+        self.clock += dt
         self.mark_t = max(0.0, self.mark_t - dt)
+        self.expose_t = max(0.0, self.expose_t - dt)
         if self.hit_t > 0:                       # 맞고 밀려나는 중엔 다른 행동 안 함
             self.hit_t -= dt
             level.move(self, self.kx * dt, self.ky * dt)
@@ -138,9 +161,13 @@ class Enemy:
         else:
             self.chase(dt, p)
 
+    # ── 그리기 ──
     def draw(self):
         h = ENEMY_PX[self.row] * 2
+        cy = self.feet() + h * 0.5
         img_draw('shadow', self.x, self.feet() + 2, h * 0.9, h * 0.25, 0.8)
+        if self.expose_t > 0:                    # 갑옷이 벗겨지면 금빛이 감돔
+            img_draw('glow_y', self.x, cy, h * 1.8, h * 1.8, 0.3 + 0.15 * math.sin(self.clock * 8))
         a = 0.35 if self.hit_t > 0 and int(self.hit_t * 30) % 2 == 0 else 1.0   # 맞으면 깜빡임
         if self.stun_t > 0:
             a = 0.55                                                         # 기절하면 흐려짐

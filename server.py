@@ -56,7 +56,11 @@ def player_attack():
 
 
 def hit_enemy(e, dmg, nx, ny):
-    """적에게 피해. 체력이 0이 되면 처치, 아니면 밀려남"""
+    """적에게 피해. 큰 그림자는 갑옷이 벗겨졌을 때만 통함. 체력이 0이 되면 처치"""
+    if e.armor and e.expose_t <= 0:
+        effects.burst(e.x, e.y + 16, 'px_white', 6, 80)     # 갑옷에 막힘
+        e.knock(nx, ny)
+        return
     e.hp -= dmg
     effects.burst(e.x, e.y + 8, 'px_lav', 8)
     if e.hp <= 0:
