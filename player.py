@@ -6,18 +6,19 @@ from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDL_MOUSEMOTION
 import game_settings
 import game_framework
 import level
+import server
 import sheet
-from draw_util import img_draw
+from draw_util import img_draw, IMG
 
-PIXEL = 33             # 도트 그림의 주인공 키 (px)
+PIXEL = 33                       # 도트 그림의 주인공 키 (px)
 PLAYER_HEIGHT = PIXEL * 2        # 화면에 보일 키 = 도트 2배
-ROWS = {                         # player.png 줄 번호: (바라보는 쪽, 동작)
-    ('side', 'idle'): 0, ('side', 'walk'): 1,
-    ('back', 'idle'): 4, ('back', 'walk'): 5,
-    ('front', 'idle'): 6, ('front', 'walk'): 7,
-}
 SPEED = game_settings.kmph_to_pps(game_settings.PLAYER_SPEED_KMPH)   # 16강: 10.7 km/h → 약 190 px/s
 IDLE_FPS = 3                     # 대기 동작: 1초에 넘기는 장 수
+ROWS = {                         # player.png 줄 번호: (바라보는 쪽, 동작)
+    ('side', 'idle'): 0, ('side', 'walk'): 1, ('side', 'attack'): 2,
+    ('back', 'idle'): 4, ('back', 'walk'): 5, ('back', 'attack'): 4,
+    ('front', 'idle'): 6, ('front', 'walk'): 7, ('front', 'attack'): 6,
+}
 
 
 def walk_frames_per_second():
@@ -64,6 +65,28 @@ class Run:
         p.draw_frame('walk', int(p.frame))
 
 
+class Attack:
+    """공격: 잠깐 공격 자세를 보여 주고 IDLE로 (공격하면서도 움직일 수 있음)"""
+
+    def enter(self, p):
+        p.pose_t = game_settings.ATTACK_TIME
+        p.atk_cd = server.ST['slash_cd']
+        server.player_attack()
+
+    def exit(self, p):
+        pass
+
+    def do(self, p):
+        p.pose_t -= game_framework.frame_time
+        if p.input_dir() != (0, 0):
+            p.walk()
+        if p.pose_t <= 0:
+            p.time_out()
+
+    def draw(self, p):
+        p.draw_frame('attack', 0)
+
+
 class Player:
     image = None                 # 12강: 그림은 클래스 변수로 한 번만 불러와서 같이 씀
 
@@ -75,19 +98,24 @@ class Player:
         self.r = 12              # 충돌 반지름
         self.face = 1            # 옆모습일 때 1: 오른쪽, -1: 왼쪽
         self.view = 'side'       # side: 옆모습, back: 뒷모습(위를 봄), front: 앞모습(아래를 봄)
-        self.fx, self.fy = 1.0, 0.0   # 바라보는 방향 (2주차에 공격·던지기 방향으로 씀)
-        self.frame = 0.0
-        self.held = set()        # 지금 누르고 있는 이동키
+        self.fx, self.fy = 1.0, 0.0   # 바라보는 방향 = 공격 방향
         self.mouse = (x + 100, y)     # 마우스 위치 (게임 화면 좌표)
         self.mouse_aim = False        # 멈춘 뒤 마우스를 움직였을 때만 마우스 쪽을 봄
+        self.frame = 0.0
+        self.clock = 0.0
+        self.atk_cd = 0.0        # 다음 공격까지 남은 시간
+        self.pose_t = 0.0        # 공격 자세 남은 시간
+        self.held = set()        # 지금 누르고 있는 이동키
 
         # 13강 상태 머신: 언제 어떤 상태로 바뀌는지는 transitions가, 상태마다 할 일은 상태 클래스가
-        self.states = {'IDLE': Idle(), 'RUN': Run()}
+        self.states = {'IDLE': Idle(), 'RUN': Run(), 'ATTACK': Attack()}
         self.machine = Machine(model=self, states=list(self.states), initial='IDLE',
                                auto_transitions=False, ignore_invalid_triggers=True,
                                before_state_change='_exit_state', after_state_change='_enter_state')
         self.machine.add_transition('move_start', 'IDLE', 'RUN')
         self.machine.add_transition('move_stop', 'RUN', 'IDLE')
+        self.machine.add_transition('attack', ['IDLE', 'RUN'], 'ATTACK', conditions='can_attack')
+        self.machine.add_transition('time_out', 'ATTACK', 'IDLE')
         self.states[self.state].enter(self)
 
     def _exit_state(self):
@@ -96,9 +124,16 @@ class Player:
     def _enter_state(self):
         self.states[self.state].enter(self)
 
+    def can_attack(self):
+        return self.atk_cd <= 0
+
     def handle_event(self, e):
-        if e.type == SDL_KEYDOWN and e.key in game_settings.KEY_MOVE:
-            self.held.add(e.key)
+        if e.type == SDL_KEYDOWN:
+            if e.key in game_settings.KEY_MOVE:
+                self.held.add(e.key)
+            elif e.key in game_settings.KEY_ATTACK:
+                self.update_aim()                  # 누른 순간 바라보는 방향으로 공격
+                self.attack()
         elif e.type == SDL_KEYUP:
             self.held.discard(e.key)
         elif e.type == SDL_MOUSEMOTION:
@@ -150,6 +185,9 @@ class Player:
         return self.x + self.face * 12, f + 17
 
     def update(self):
+        dt = game_framework.frame_time
+        self.clock += dt
+        self.atk_cd = max(0.0, self.atk_cd - dt)
         self.update_aim()
         self.states[self.state].do(self)
 
