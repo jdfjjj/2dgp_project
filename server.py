@@ -6,9 +6,11 @@ import game_settings
 import game_world
 import level
 import effects
+import items
 
 player = None
 enemies = []
+orbs = []
 light_t = game_settings.START_LIGHT        # 지금 빛의 양 (2주차부터 시간이 지나면 줄어듦)
 ST = dict(game_settings.BASE_STATS)        # 주인공 능력치 (3주차에 강화 카드로 오름)
 
@@ -55,3 +57,26 @@ def kill(e):
         game_world.remove_object(e)
         effects.burst(e.x, e.y + 8, 'px_lav', 14, 160)
         effects.burst(e.x, e.y + 8, 'px_white', 6, 120)
+
+
+def player_throw():
+    """빛 던지기: 빛을 써서, 손에서 바라보는 방향으로 빛 구슬을 날림"""
+    global light_t
+    p = player
+    light_t -= ST['throw_cost']
+    hx, hy = p.hand()
+    o = items.Orb(hx, hy, p.fx, p.fy)
+    orbs.append(o)
+    game_world.add_object(o, game_world.LAYER_FX)
+
+
+def remove_orb(o):
+    if o in orbs:
+        orbs.remove(o)
+        game_world.remove_object(o)
+
+
+def orb_hit(e):
+    """빛 구슬에 맞은 적은 잠깐 기절"""
+    e.stun(game_settings.STUN_TIME)
+    effects.burst(e.x, e.y + 8, 'px_gold', 8)

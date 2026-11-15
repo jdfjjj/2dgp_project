@@ -17,6 +17,7 @@ def init():
     level.build()
     game_world.add_object(level.LevelView(), game_world.LAYER_FLOOR)
     server.enemies = []
+    server.orbs = []
     for x, y in level.spawns:
         server.enemies.append(Enemy('blob', x, y))
     game_world.add_objects(server.enemies, game_world.LAYER_CHAR)
