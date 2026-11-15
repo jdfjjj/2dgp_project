@@ -5,9 +5,10 @@ from game_settings import W, H
 import game_framework
 import game_world
 import darkness
-import hud
 import level
 import server
+import items
+import hud
 from player import Player
 from enemy import Enemy
 from draw_util import box
@@ -21,9 +22,13 @@ def init():
     server.light_t = game_settings.START_LIGHT
     server.enemies = []
     server.orbs = []
+    server.pickups = []
     for x, y in level.spawns:
         server.enemies.append(Enemy('blob', x, y))
     game_world.add_objects(server.enemies, game_world.LAYER_CHAR)
+    for x, y in level.random_spots(game_settings.SHARD_COUNT, level.start, 150):
+        server.pickups.append(items.Pickup(x, y))
+    game_world.add_objects(server.pickups, game_world.LAYER_FX)
     server.player = Player(*level.start)
     game_world.add_object(server.player, game_world.LAYER_CHAR)
     game_world.add_object(darkness.Darkness(), game_world.LAYER_DARK)

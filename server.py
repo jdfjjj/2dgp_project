@@ -11,6 +11,7 @@ import items
 player = None
 enemies = []
 orbs = []
+pickups = []
 light_t = game_settings.START_LIGHT        # 지금 빛의 양 (2주차부터 시간이 지나면 줄어듦)
 ST = dict(game_settings.BASE_STATS)        # 주인공 능력치 (3주차에 강화 카드로 오름)
 
@@ -92,3 +93,13 @@ def orb_hit(e):
     """빛 구슬에 맞은 적은 잠깐 기절"""
     e.stun(game_settings.STUN_TIME)
     effects.burst(e.x, e.y + 8, 'px_gold', 8)
+
+
+def pick_light(pk):
+    """빛 조각 줍기: 빛이 차고, 조각이 흩어지며 +7 이 떠오름"""
+    if pk in pickups:
+        pickups.remove(pk)
+        game_world.remove_object(pk)
+        add_light(game_settings.SHARD_LIGHT)
+        effects.burst(pk.x, pk.y, 'px_gold', 10, 100)
+        effects.text(pk.x, pk.y + 24, '+%d' % game_settings.SHARD_LIGHT, 'y')
