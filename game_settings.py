@@ -1,5 +1,5 @@
 import os
-from pico2d import SDLK_w, SDLK_a, SDLK_s, SDLK_d
+from pico2d import SDLK_w, SDLK_a, SDLK_s, SDLK_d, SDLK_SPACE
 
 # ─────────── 화면 / 경로 ───────────
 W, H = 960, 640
@@ -17,6 +17,8 @@ KEY_DOWN = (SDLK_s,)
 KEY_LEFT = (SDLK_a,)
 KEY_RIGHT = (SDLK_d,)
 KEY_MOVE = KEY_UP + KEY_DOWN + KEY_LEFT + KEY_RIGHT
+KEY_ATTACK = (SDLK_SPACE,)
+ATTACK_TIME = 0.16               # 공격 자세를 보여 주는 시간 (초)
 
 # ─────────── 물리 단위 (16강) : 타일 한 칸(32px) = 0.5m ───────────
 PIXEL_PER_METER = 32.0 / 0.5
@@ -35,7 +37,8 @@ LIGHT_BASE = 46                  # 빛이 없을 때 시야 (px)
 START_LIGHT = 8.0                # 층 시작할 때 빛
 CELL = 16                        # 어둠 칸 크기 (버벅이면 24로)
 PLAYER_SCALE = 2
-BASE_STATS = dict(speed=kmph_to_pps(PLAYER_SPEED_KMPH), light_cap=20.0, sight=190.0)
+BASE_STATS = dict(speed=kmph_to_pps(PLAYER_SPEED_KMPH), light_cap=20.0, sight=190.0,
+                  reach=72.0, arc=110.0, slash_cd=0.42, dmg=1)   # 공격 사거리, 각도, 대기시간, 피해
 
 # ─────────── 층 배경 테마 ───────────
 THEMES = [
