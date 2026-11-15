@@ -8,7 +8,7 @@ from pico2d import load_image
 import game_settings
 import draw_util
 
-ASSET_VERSION = 'w2a3'
+ASSET_VERSION = 'w2b'
 
 
 def gp(name):
@@ -262,10 +262,24 @@ LIGHT_ICON = [                           # 십자로 빛이 뻗는 반짝이 별
     '....Y....',
 ]
 
+HEART_PAL = {'o': (60, 14, 30), 'R': (255, 90, 110), 'r': (190, 50, 80), 'W': (255, 200, 210)}
+HEART_EMPTY_PAL = {'o': (90, 70, 110), 'R': (30, 22, 44), 'r': (30, 22, 44), 'W': (50, 40, 70)}
+HEART_ICON = [
+    '.oo...oo.',
+    'oWRo.oRRo',
+    'oWRRoRRro',
+    'oRRRRRRro',
+    '.oRRRRro.',
+    '..oRRro..',
+    '...oro...',
+    '....o....',
+]
+
 
 SOLIDS = {
     'dark': (0, 0, 0, 255), 'shade': (0, 0, 0, 170), 'panel': (18, 14, 30, 235),
     'bar_light': (190, 160, 255, 255), 'px_white': (240, 240, 255, 255), 'px_lav': (200, 170, 255, 255),
+    'px_red': (255, 90, 110, 255),
     'px_gold': (255, 215, 110, 255), 'bar_gold': (255, 230, 140, 255),
 }
 
@@ -312,6 +326,8 @@ def build_images():
     for deg in (110, 140, 170, 200, 230):        # 강화 단계별 공격 각도
         gen('fan%d' % deg, 128, 128, fan_fn(deg), True)
     sprite('i_light', LIGHT_ICON, LIGHT_PAL)
+    sprite('i_heart', HEART_ICON, HEART_PAL)
+    sprite('i_heart_e', HEART_ICON, HEART_EMPTY_PAL)
     for name, col in SOLIDS.items():
         gen(name, 1, 1, lambda x, y, col=col: col)
 
