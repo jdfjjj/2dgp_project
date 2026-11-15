@@ -19,6 +19,12 @@ KEY_RIGHT = (SDLK_d,)
 KEY_MOVE = KEY_UP + KEY_DOWN + KEY_LEFT + KEY_RIGHT
 MOUSE_LEFT = 1                   # 마우스 왼쪽 버튼: 공격
 ATTACK_TIME = 0.16               # 공격 자세를 보여 주는 시간 (초)
+KEY_THROW = (SDLK_SPACE,)        # 빛 던지기
+THROW_TIME = 0.15                # 던지는 자세를 보여 주는 시간 (초)
+ORB_SPEED = 420                  # 빛 구슬이 날아가는 속도 (px/s)
+ORB_RANGE = 300                  # 빛 구슬이 날아가는 최대 거리 (px)
+ORB_LIGHT = 70                   # 떨어진 빛 구슬이 밝히는 반경 (px)
+STUN_TIME = 0.9                  # 빛 구슬에 맞은 적이 기절하는 시간 (초)
 
 # ─────────── 물리 단위 (16강) : 타일 한 칸(32px) = 0.5m ───────────
 PIXEL_PER_METER = 32.0 / 0.5
@@ -38,7 +44,8 @@ START_LIGHT = 8.0                # 층 시작할 때 빛
 CELL = 16                        # 어둠 칸 크기 (버벅이면 24로)
 PLAYER_SCALE = 2
 BASE_STATS = dict(speed=kmph_to_pps(PLAYER_SPEED_KMPH), light_cap=20.0, sight=190.0,
-                  reach=72.0, arc=110.0, slash_cd=0.42, dmg=1)   # 공격 사거리, 각도, 대기시간, 피해
+                  reach=72.0, arc=110.0, slash_cd=0.42, dmg=1,       # 공격 사거리, 각도, 대기시간, 피해
+                  throw_cost=1.5, throw_cd=0.35, orb_life=5.0)     # 던지기 비용, 대기시간, 빛 구슬 지속시간
 
 # ─────────── 층 배경 테마 ───────────
 THEMES = [
