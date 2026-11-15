@@ -226,7 +226,7 @@ def _eyes_version(src):
 
 
 class Sheet:
-    def __init__(self, path, cols, rows, per_row=False, pixel=None, groups=None, heights=None):
+    def __init__(self, path, cols, rows, per_row=False, pixel=None, groups=None, heights=None, eyes=False):
         name = os.path.basename(path)
         if pixel:
             path = _pixel_version(path, cols, rows, pixel, groups, heights)
@@ -234,6 +234,11 @@ class Sheet:
         _set_smooth(not self.pixel)               # 도트는 부드럽게 늘리지 않고 계단식으로 키움
         self.image = load_image(path)
         _set_smooth(False)
+        self.eyes = None                          # 밝은 점(눈)만 남긴 그림 (eyes=True일 때)
+        if eyes:
+            ep = _eyes_version(path)
+            if ep:
+                self.eyes = load_image(ep)
         self.per_row = per_row                    # True면 줄마다 따로 키를 맞춤 (적처럼 줄마다 다른 그림)
         rows_a = _alpha_rows(path)
         if rows_a:
@@ -246,10 +251,12 @@ class Sheet:
             self.row_h = {r: ch for r in range(rows)}
         self.ref_h = self.row_h[0]
 
-    def draw(self, col, row, x, y, height, flip='', sx=1.0, sy=1.0, rad=0.0, alpha=1.0):
-        """(x, y) = 발 위치, height = 화면에 보일 키(px). 도트 그림은 가장 가까운 정수 배로 그림"""
+    def draw(self, col, row, x, y, height, flip='', sx=1.0, sy=1.0, rad=0.0, alpha=1.0, eyes=False):
+        """(x, y) = 발 위치, height = 화면에 보일 키(px). 도트 그림은 가장 가까운 정수 배로 그림.
+        eyes=True면 밝은 점(눈)만 남긴 그림을 같은 자리에 그림"""
+        img = self.eyes if eyes else self.image
         f = self.frames.get((col, row))
-        if not f:
+        if not f or img is None:
             return
         left, top, bw, bh, foot = f
         k = height / (self.row_h[row] if self.per_row else self.ref_h)
@@ -259,23 +266,24 @@ class Sheet:
         dx = (bw / 2 - foot) * k * sx
         if flip:
             dx = -dx
-        bottom = self.image.h - (top + bh)
+        bottom = img.h - (top + bh)
         if alpha < 0.999:
-            self.image.opacify(alpha)
-        self.image.clip_composite_draw(left, bottom, bw, bh, rad, flip,
-                                       round(x + dx), round(y + h / 2), w, h)
+            img.opacify(alpha)
+        img.clip_composite_draw(left, bottom, bw, bh, rad, flip,
+                                round(x + dx), round(y + h / 2), w, h)
         if alpha < 0.999:
-            self.image.opacify(1.0)
+            img.opacify(1.0)
 
 
 _cache = {}
 
 
-def load(name, cols, rows, per_row=False, pixel=None, groups=None, heights=None):
-    """images/name 이 있으면 Sheet, 없으면 None (한 번만 불러옴). pixel을 주면 도트 버전으로"""
-    key = (name, pixel, groups, tuple(sorted(heights.items())) if heights else None)
+def load(name, cols, rows, per_row=False, pixel=None, groups=None, heights=None, eyes=False):
+    """images/name 이 있으면 Sheet, 없으면 None (한 번만 불러옴). pixel을 주면 도트 버전으로,
+    eyes=True면 눈만 남긴 그림도 같이 만듦"""
+    key = (name, pixel, groups, tuple(sorted(heights.items())) if heights else None, eyes)
     if key not in _cache:
         path = os.path.join(IMG_DIR, name)
-        _cache[key] = (Sheet(path, cols, rows, per_row, pixel, groups, heights)
+        _cache[key] = (Sheet(path, cols, rows, per_row, pixel, groups, heights, eyes)
                        if os.path.exists(path) else None)
     return _cache[key]
