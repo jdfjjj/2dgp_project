@@ -39,6 +39,7 @@ class Enemy:
         self.mark, self.mark_t = '', 0.0
         self.kx = self.ky = 0.0                  # 밀려나는 속도
         self.hit_t = 0.0                         # 맞고 밀려나는 남은 시간
+        self.stun_t = 0.0                        # 기절 남은 시간
         self.pick_wander()
 
     def feet(self):
@@ -77,6 +78,10 @@ class Enemy:
             self.last_seen, self.lost_t = (p.x, p.y), 0.0
             self.show_mark('!')
 
+    def stun(self, t):
+        """빛 구슬에 맞아 기절: 그 자리에 멈춤"""
+        self.stun_t = t
+
     def show_mark(self, mark):
         self.mark, self.mark_t = mark, MARK_TIME
 
@@ -107,7 +112,6 @@ class Enemy:
 
     def update(self):
         dt = game_framework.frame_time
-        self.frame = (self.frame + 6 * dt) % 4
         self.mark_t = max(0.0, self.mark_t - dt)
         if self.hit_t > 0:                       # 맞고 밀려나는 중엔 다른 행동 안 함
             self.hit_t -= dt
@@ -116,6 +120,10 @@ class Enemy:
             self.kx *= decay
             self.ky *= decay
             return
+        if self.stun_t > 0:                      # 기절 중엔 움직이지 않음
+            self.stun_t -= dt
+            return
+        self.frame = (self.frame + 6 * dt) % 4
         p = server.player
         if self.state == 'wander':
             self.wander(dt)
@@ -130,6 +138,8 @@ class Enemy:
         h = ENEMY_PX[self.row] * 2
         img_draw('shadow', self.x, self.feet() + 2, h * 0.9, h * 0.25, 0.8)
         a = 0.35 if self.hit_t > 0 and int(self.hit_t * 30) % 2 == 0 else 1.0   # 맞으면 깜빡임
+        if self.stun_t > 0:
+            a = 0.55                                                         # 기절하면 흐려짐
         Enemy.image.draw(int(self.frame), self.row, self.x, self.feet(), h,
                          '' if self.face > 0 else 'h', alpha=a)
 
