@@ -25,6 +25,11 @@ ORB_SPEED = 420                  # 빛 구슬이 날아가는 속도 (px/s)
 ORB_RANGE = 300                  # 빛 구슬이 날아가는 최대 거리 (px)
 ORB_LIGHT = 70                   # 떨어진 빛 구슬이 밝히는 반경 (px)
 STUN_TIME = 0.9                  # 빛 구슬에 맞은 적이 기절하는 시간 (초)
+MAX_HEARTS = 3                   # 하트 개수
+INVULN_TIME = 1.3                # 맞은 뒤 무적 시간 (초)
+HURT_TIME = 0.35                 # 피격 그림을 보여 주는 시간 (초)
+PLAYER_KNOCK = 320               # 맞았을 때 밀려나는 속도 (px/s)
+DEATH_DELAY = 1.0                # 쓰러진 뒤 게임 오버 화면까지 (초)
 
 # ─────────── 물리 단위 (16강) : 타일 한 칸(32px) = 0.5m ───────────
 PIXEL_PER_METER = 32.0 / 0.5
