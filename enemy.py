@@ -106,6 +106,11 @@ class Enemy:
             self.stun_t = t
         self.alert()
 
+    def steal(self, amount):
+        """빛 도둑: 빛을 훔쳐서 달아나기 시작"""
+        self.carry = amount
+        self.state = 'flee'
+
     # ── 발견하고 쫓아오기 ──
     def show_mark(self, mark):
         self.mark, self.mark_t = mark, MARK_TIME
@@ -134,6 +139,16 @@ class Enemy:
         if d > 1:
             s = self.chase_speed * dt
             self.step(dx / d * s, dy / d * s)
+
+    def flee(self, dt, p):
+        """빛을 든 빛 도둑: 주인공 반대쪽으로 달아남 (느려짐)"""
+        dx, dy = self.x - p.x, self.y - p.y
+        d = max(1.0, math.hypot(dx, dy))
+        s = self.chase_speed * game_settings.THIEF_SLOW * dt
+        ox, oy = self.x, self.y
+        self.step(dx / d * s, dy / d * s)
+        if abs(self.x - ox) + abs(self.y - oy) < 0.01:      # 벽에 막히면 옆으로 비켜 감
+            self.step(-dy / d * s, dx / d * s)
 
     def update_slam(self, dt, p):
         """큰 그림자의 내려찍기: 가까우면 멈춰서 빨간 원을 보여 주고, 잠시 뒤 원 안을 내려찍음.
@@ -180,6 +195,8 @@ class Enemy:
                 self.state = 'chase'
                 self.last_seen, self.lost_t = (p.x, p.y), 0.0
                 self.show_mark('!')
+        elif self.state == 'flee':
+            self.flee(dt, p)
         else:
             self.chase(dt, p)
 
@@ -188,6 +205,8 @@ class Enemy:
         h = ENEMY_PX[self.row] * 2
         cy = self.feet() + h * 0.5
         img_draw('shadow', self.x, self.feet() + 2, h * 0.9, h * 0.25, 0.8)
+        if self.carry > 0:                       # 훔친 빛을 들고 있으면 빛남
+            img_draw('glow_y', self.x, cy, h * 2, h * 2, 0.35 + 0.1 * math.sin(self.clock * 6))
         if self.expose_t > 0:                    # 갑옷이 벗겨지면 금빛이 감돔
             img_draw('glow_y', self.x, cy, h * 1.8, h * 1.8, 0.3 + 0.15 * math.sin(self.clock * 8))
         a = 0.35 if self.hit_t > 0 and int(self.hit_t * 30) % 2 == 0 else 1.0   # 맞으면 깜빡임

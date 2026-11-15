@@ -70,12 +70,14 @@ def hit_enemy(e, dmg, nx, ny):
 
 
 def kill(e):
-    """적 처치: 게임 월드와 적 목록에서 빼고 조각으로 흩어짐"""
+    """적 처치: 조각으로 흩어지고, 빛 도둑이 들고 있던 빛은 바닥에 떨어지고, 빛이 1 참"""
     if e in enemies:
         enemies.remove(e)
         game_world.remove_object(e)
         effects.burst(e.x, e.y + 8, 'px_lav', 14, 160)
         effects.burst(e.x, e.y + 8, 'px_white', 6, 120)
+        if e.carry > 0:
+            drop_light(e.x, e.y, e.carry)
 
 
 def player_throw():
@@ -99,6 +101,13 @@ def orb_hit(e):
     """빛 구슬에 맞은 적은 잠깐 기절"""
     e.stun(game_settings.STUN_TIME)
     effects.burst(e.x, e.y + 8, 'px_gold', 8)
+
+
+def drop_light(x, y, value):
+    """바닥에 빛 조각을 떨어뜨림 (빛 도둑이 훔쳐 간 빛 등). 어둠 아래 레이어라 빛이 닿아야 보임"""
+    pk = items.Pickup(x, y, value)
+    pickups.append(pk)
+    game_world.add_object(pk, game_world.LAYER_ITEM)
 
 
 def pick_light(pk):
@@ -128,13 +137,33 @@ def hurt_player(sx, sy, dmg=1):
         dead_t = game_settings.DEATH_DELAY
 
 
+def steal_light(e):
+    """빛 도둑: 하트 대신 빛을 훔쳐서 달아남"""
+    global light_t
+    p = player
+    amount = min(game_settings.THIEF_STEAL, light_t)
+    if amount <= 0:
+        return
+    light_t -= amount
+    e.steal(amount)
+    p.invuln = 0.6                                 # 연달아 뺏기지 않게 잠깐 무적
+    effects.burst(p.x, p.y + 20, 'px_gold', 10, 120)
+    effects.text(p.x, p.y + 70, '-%d' % math.ceil(amount), 'y')
+
+
 def check_contacts():
-    """적과 몸이 닿으면 피격 (맞고 밀려나거나 기절한 적은 공격하지 않음)"""
+    """적과 몸이 닿으면: 빛 도둑은 빛을 훔치고, 나머지는 피격
+    (맞고 밀려나거나 기절한 적, 빛을 이미 든 빛 도둑은 공격하지 않음)"""
     p = player
     for e in enemies:
         if e.hit_t > 0 or e.stun_t > 0:
             continue
-        if math.hypot(e.x - p.x, e.y - p.y) < e.r + p.r:
+        if math.hypot(e.x - p.x, e.y - p.y) >= e.r + p.r:
+            continue
+        if e.kind == 'thief':
+            if e.carry <= 0 and p.invuln <= 0:
+                steal_light(e)
+        else:
             hurt_player(e.x, e.y)
 
 

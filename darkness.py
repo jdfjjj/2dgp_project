@@ -1,6 +1,7 @@
 import math
 
 import game_framework
+import game_settings
 import server
 from game_settings import W, HUD_Y, CELL, LIGHT_CORE
 from draw_util import box, img_draw
@@ -46,7 +47,8 @@ class Darkness:
         p = server.player
         t = self.clock
         rad = server.light_radius() * (1 + 0.02 * math.sin(t * 9))       # 빛이 살짝 일렁임
-        lights = [(p.x, p.y + 20, rad)] + [o.light() for o in server.orbs]  # 주인공 빛 + 던진 빛
+        lights = ([(p.x, p.y + 20, rad)] + [o.light() for o in server.orbs] +
+                  [(e.x, e.y + 10, game_settings.THIEF_LIGHT) for e in server.enemies if e.carry > 0])
         draw_darkness(lights)
         p.draw_aim()                                                      # 공격 범위 부채꼴
         img_draw('glow_y', p.x, p.y + 20, rad * 2.2, rad * 2.2, 0.06)     # 빛이 닿는 곳의 따뜻한 기운
