@@ -2,13 +2,14 @@ import math
 
 import game_framework
 import server
-from game_settings import W, HUD_Y, CELL
+from game_settings import W, HUD_Y, CELL, LIGHT_CORE
 from draw_util import box, img_draw
 
 
 def draw_darkness(lights):
-    """화면을 CELL 크기 칸으로 나눠서, 칸마다 가장 가까운 빛을 기준으로 어둠의 진하기를 정함.
-    lights: [(x, y, 반경), ...]  빛 가운데는 밝고 가장자리로 갈수록 어두워짐"""
+    """화면을 CELL 크기 칸으로 나눠서, 칸마다 빛들을 기준으로 어둠의 진하기를 정함.
+    lights: [(x, y, 반경), ...]  빛 가운데(LIGHT_CORE)는 완전히 밝고, 바깥으로 갈수록 빠르게 어두워짐.
+    빛이 여러 개 겹치면 더 밝아짐"""
     for gy in range(0, HUD_Y, CELL):
         run = None                                   # 완전히 어두운 칸이 이어지는 시작 위치
         for gx in range(0, W, CELL):
@@ -17,7 +18,8 @@ def draw_darkness(lights):
             for lx, ly, rad in lights:
                 d = math.hypot(cx - lx, cy - ly) / rad
                 if d < 1.0:
-                    a = min(a, d * d)
+                    t = max(0.0, (d - LIGHT_CORE) / (1 - LIGHT_CORE))
+                    a *= t * t * (3 - 2 * t)
             if a >= 0.999:                           # 완전히 어두운 칸은 모아서 한 번에 그림
                 if run is None:
                     run = gx

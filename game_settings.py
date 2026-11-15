@@ -45,6 +45,7 @@ LIGHT_DECAY = 0.25               # 1초에 줄어드는 빛
 SHARD_LIGHT = 7                  # 빛 조각 하나로 채워지는 빛
 SHARD_COUNT = 6                  # 맵에 놓이는 빛 조각 수
 CELL = 16                        # 어둠 칸 크기 (버벅이면 24로)
+LIGHT_CORE = 0.2                 # 빛 반경 중 완전히 밝은 가운데 비율 (바깥으로 갈수록 빠르게 어두워짐)
 PLAYER_SCALE = 2
 BASE_STATS = dict(speed=kmph_to_pps(PLAYER_SPEED_KMPH), light_cap=20.0, sight=190.0,
                   reach=72.0, arc=110.0, slash_cd=0.42, dmg=1,       # 공격 사거리, 각도, 대기시간, 피해
