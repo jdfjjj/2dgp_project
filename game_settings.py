@@ -69,10 +69,23 @@ THEMES = [
 # ─────────── 적 ───────────
 ENEMY_DEF = {                    # row: enemies.png 줄, walk/chase: 배회/추격 속도(km/h), r: 충돌 반지름
     'blob': dict(row=0, hp=1, walk=3.1, chase=5.3, r=10),
+    'thief': dict(row=2, hp=2, walk=3.1, chase=5.9, r=11),
+    'brute': dict(row=3, hp=5, walk=2.0, chase=3.5, r=14, armor=True),
 }
 DETECT_BASE = 95                 # 적이 알아채는 기본 거리 (px). 여기에 내 빛 반경의 절반을 더함
 CLOSE_DETECT = 52                # 이 거리 안이면 벽과 상관없이 무조건 알아챔
 LOSE_TIME = 2.5                  # 놓친 뒤 이 시간이 지나면 포기 (초)
+KILL_LIGHT = 1                   # 적을 처치하면 차는 빛
+THIEF_STEAL = 3                  # 빛 도둑이 훔치는 빛
+THIEF_SLOW = 0.65                # 빛을 들고 달아날 때 속도 배율
+THIEF_LIGHT = 40                 # 훔친 빛을 든 빛 도둑 주변이 밝은 반경 (px)
+EXPOSE_TIME = 4.0                # 빛 구슬에 맞은 큰 그림자의 갑옷이 벗겨지는 시간 (초)
+SLAM_RANGE = 70                  # 이 거리 안이면 내려찍기 준비 (px)
+SLAM_RADIUS = 88                 # 내려찍기 범위 (px)
+SLAM_WINDUP = 0.75               # 빨간 원을 보여 주는 시간 (초)
+SLAM_RECOVER = 0.9               # 내려찍은 뒤 멈춰 있는 시간 (초)
+SLAM_CD = 2.2                    # 다음 내려찍기까지 (초)
+SLAM_DMG = 2                     # 내려찍기 피해 (하트)
 
 
 def clampf(v, lo, hi):
