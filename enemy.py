@@ -10,6 +10,7 @@ from draw_util import img_draw, say, box
 
 ENEMY_PX = {0: 16, 1: 16, 2: 20, 3: 30, 4: 44}   # 적 종류(줄)마다 도트 키. 화면에는 2배로 그림
 WANDER_TIME = (1.0, 2.5)                         # 한 방향으로 어슬렁거리는 시간 (초)
+SEEK_CHANCE = 0.8                                # 어슬렁거릴 때 주인공 쪽으로 방향을 잡을 확률
 MARK_TIME = 0.9                                  # 머리 위 !, ? 가 떠 있는 시간 (초)
 KNOCK_SPEED = 260                                # 맞았을 때 밀려나는 속도 (px/s)
 
@@ -61,8 +62,14 @@ class Enemy:
 
     # ── 어슬렁거리기 ──
     def pick_wander(self):
-        if random.random() < 0.3:
+        """어슬렁거릴 방향 고르기: 잠깐 멈추거나, 대부분은 주인공 쪽으로(조금 흔들리게), 나머지는 아무 쪽으로"""
+        r = random.random()
+        p = server.player
+        if r < 0.1:
             self.dir = (0.0, 0.0)                # 잠깐 멈춰 있기
+        elif r < 0.1 + SEEK_CHANCE and p:
+            a = math.atan2(p.y - self.y, p.x - self.x) + random.uniform(-0.7, 0.7)
+            self.dir = (math.cos(a), math.sin(a))
         else:
             a = random.uniform(0, math.tau)
             self.dir = (math.cos(a), math.sin(a))
