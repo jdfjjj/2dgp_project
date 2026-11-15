@@ -1,5 +1,6 @@
 from pico2d import get_events, clear_canvas, update_canvas, SDL_QUIT, SDL_KEYDOWN, SDLK_ESCAPE
 
+import game_settings
 from game_settings import W, H
 import game_framework
 import game_world
@@ -16,6 +17,7 @@ def init():
     game_world.clear()
     level.build()
     game_world.add_object(level.LevelView(), game_world.LAYER_FLOOR)
+    server.light_t = game_settings.START_LIGHT
     server.enemies = []
     server.orbs = []
     for x, y in level.spawns:
@@ -50,6 +52,7 @@ def handle_events():
 
 def update():
     game_world.update()
+    server.update_light(game_framework.frame_time)
 
 
 def draw():

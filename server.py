@@ -21,6 +21,18 @@ def light_radius():
     return game_settings.LIGHT_BASE + (ST['sight'] - game_settings.LIGHT_BASE) * k
 
 
+def update_light(dt):
+    """시간이 지나면 빛이 조금씩 줄어듦"""
+    global light_t
+    light_t = max(0.0, light_t - game_settings.LIGHT_DECAY * dt)
+
+
+def add_light(v):
+    """빛을 채움 (최대 빛을 넘지 않게)"""
+    global light_t
+    light_t = min(ST['light_cap'], light_t + v)
+
+
 def player_attack():
     """부채꼴 공격: 사거리 안, 각도 안, 벽에 가리지 않은 적에게 피해"""
     p = player
