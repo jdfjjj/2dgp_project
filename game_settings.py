@@ -17,7 +17,7 @@ KEY_DOWN = (SDLK_s,)
 KEY_LEFT = (SDLK_a,)
 KEY_RIGHT = (SDLK_d,)
 KEY_MOVE = KEY_UP + KEY_DOWN + KEY_LEFT + KEY_RIGHT
-KEY_ATTACK = (SDLK_SPACE,)
+MOUSE_LEFT = 1                   # 마우스 왼쪽 버튼: 공격
 ATTACK_TIME = 0.16               # 공격 자세를 보여 주는 시간 (초)
 
 # ─────────── 물리 단위 (16강) : 타일 한 칸(32px) = 0.5m ───────────
