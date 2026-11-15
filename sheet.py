@@ -157,12 +157,15 @@ def _analyze(rows_a, cols, rows, name):
     return frames, row_h
 
 
-def _pixel_version(src, cols, rows, pixel, groups=None):
+def _pixel_version(src, cols, rows, pixel, groups=None, heights=None):
     """원본을 줄여서 도트 그림을 만들어 escape_assets에 저장 (처음 한 번만).
     groups: 같은 키로 맞출 줄 묶음 (예: 옆모습 줄들, 뒷모습 줄들, 앞모습 줄들).
-            묶음마다 첫 줄의 보통 키가 pixel이 되도록 따로 줄임. 없으면 전부 첫 줄 기준"""
+            묶음마다 첫 줄의 보통 키가 pixel이 되도록 따로 줄임. 없으면 전부 첫 줄 기준
+    heights: {줄 번호: 키} 로 줄마다 도트 키를 따로 정함 (적처럼 줄마다 크기가 다를 때)"""
     stem = os.path.splitext(os.path.basename(src))[0]
     tag = '_g' + ''.join(str(g[0]) for g in groups) if groups else ''
+    if heights:
+        tag += '_h' + '-'.join('%d' % heights[r] for r in sorted(heights))
     dst = os.path.join(game_settings.GEN_DIR, '%s_px%d%s_v%d.png' % (stem, pixel, tag, PIXEL_VER))
     if os.path.exists(dst) and os.path.getmtime(dst) >= os.path.getmtime(src):
         return dst
@@ -177,6 +180,8 @@ def _pixel_version(src, cols, rows, pixel, groups=None):
         f = max(1.0, row_h[g[0]] / float(pixel))
         for r in g:
             factor[r] = f
+    for r, ph in (heights or {}).items():
+        factor[r] = max(1.0, row_h[r] / float(ph))
     print('도트 그림 만드는 중... %s (처음 한 번만)' % os.path.basename(src))
 
     small = {}                                       # 칸마다 따로 줄인 그림
@@ -200,10 +205,10 @@ def _pixel_version(src, cols, rows, pixel, groups=None):
 
 
 class Sheet:
-    def __init__(self, path, cols, rows, per_row=False, pixel=None, groups=None):
+    def __init__(self, path, cols, rows, per_row=False, pixel=None, groups=None, heights=None):
         name = os.path.basename(path)
         if pixel:
-            path = _pixel_version(path, cols, rows, pixel, groups)
+            path = _pixel_version(path, cols, rows, pixel, groups, heights)
         self.pixel = bool(pixel)
         _set_smooth(not self.pixel)               # 도트는 부드럽게 늘리지 않고 계단식으로 키움
         self.image = load_image(path)
@@ -245,10 +250,11 @@ class Sheet:
 _cache = {}
 
 
-def load(name, cols, rows, per_row=False, pixel=None, groups=None):
+def load(name, cols, rows, per_row=False, pixel=None, groups=None, heights=None):
     """images/name 이 있으면 Sheet, 없으면 None (한 번만 불러옴). pixel을 주면 도트 버전으로"""
-    key = (name, pixel, groups)
+    key = (name, pixel, groups, tuple(sorted(heights.items())) if heights else None)
     if key not in _cache:
         path = os.path.join(IMG_DIR, name)
-        _cache[key] = Sheet(path, cols, rows, per_row, pixel, groups) if os.path.exists(path) else None
+        _cache[key] = (Sheet(path, cols, rows, per_row, pixel, groups, heights)
+                       if os.path.exists(path) else None)
     return _cache[key]
