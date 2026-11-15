@@ -102,7 +102,7 @@ def pick_light(pk):
     if pk in pickups:
         pickups.remove(pk)
         game_world.remove_object(pk)
-        add_light(game_settings.SHARD_LIGHT)
+        add_light(pk.value)
         effects.burst(pk.x, pk.y, 'px_gold', 10, 100)
 
 

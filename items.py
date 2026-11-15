@@ -70,9 +70,10 @@ class Pickup:
     """바닥에 놓인 빛 조각: 주인공이 닿으면 빛이 참.
     어둠 아래 아이템 레이어에 넣어서, 빛이 닿는 곳에서만 보임"""
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, value=None):
         self.x, self.y = x, y
         self.r = 10
+        self.value = value or game_settings.SHARD_LIGHT     # 주우면 차는 빛
         self.clock = random.random() * 6
 
     def update(self):
