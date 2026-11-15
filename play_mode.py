@@ -20,6 +20,8 @@ def init():
     level.build()
     game_world.add_object(level.LevelView(), game_world.LAYER_FLOOR)
     server.light_t = game_settings.START_LIGHT
+    server.dead_t = 0.0
+    server.play_time = 0.0
     server.enemies = []
     server.orbs = []
     server.pickups = []
@@ -57,8 +59,12 @@ def handle_events():
 
 
 def update():
+    dt = game_framework.frame_time
     game_world.update()
-    server.update_light(game_framework.frame_time)
+    server.update_light(dt)
+    server.check_contacts()
+    if server.player.hearts > 0:
+        server.play_time += dt
 
 
 def draw():

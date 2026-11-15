@@ -12,6 +12,8 @@ player = None
 enemies = []
 orbs = []
 pickups = []
+dead_t = 0.0                               # 쓰러진 뒤 게임 오버까지 남은 시간
+play_time = 0.0                            # 이번 판 플레이 시간
 light_t = game_settings.START_LIGHT        # 지금 빛의 양 (2주차부터 시간이 지나면 줄어듦)
 ST = dict(game_settings.BASE_STATS)        # 주인공 능력치 (3주차에 강화 카드로 오름)
 
@@ -102,3 +104,31 @@ def pick_light(pk):
         game_world.remove_object(pk)
         add_light(game_settings.SHARD_LIGHT)
         effects.burst(pk.x, pk.y, 'px_gold', 10, 100)
+
+
+def hurt_player(sx, sy, dmg=1):
+    """주인공 피격: 하트가 줄고, 맞은 반대쪽으로 밀려나고, 잠깐 무적. 하트가 0이면 쓰러짐"""
+    global dead_t
+    p = player
+    if p.invuln > 0 or p.hearts <= 0:
+        return
+    p.hearts -= dmg
+    p.invuln, p.hurt_t = game_settings.INVULN_TIME, game_settings.HURT_TIME
+    dx, dy = p.x - sx, p.y - sy
+    d = max(1.0, math.hypot(dx, dy))
+    p.kx, p.ky = dx / d * game_settings.PLAYER_KNOCK, dy / d * game_settings.PLAYER_KNOCK
+    effects.burst(p.x, p.y + 20, 'px_red', 10, 120)
+    effects.text(p.x, p.y + 70, '-%d' % dmg, 'r')
+    if p.hearts <= 0:
+        p.hurt_t, p.view = 99.0, 'side'            # 쓰러진 모습 유지
+        dead_t = game_settings.DEATH_DELAY
+
+
+def check_contacts():
+    """적과 몸이 닿으면 피격 (맞고 밀려나거나 기절한 적은 공격하지 않음)"""
+    p = player
+    for e in enemies:
+        if e.hit_t > 0 or e.stun_t > 0:
+            continue
+        if math.hypot(e.x - p.x, e.y - p.y) < e.r + p.r:
+            hurt_player(e.x, e.y)
